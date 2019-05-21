@@ -1,31 +1,32 @@
 <?php
-/**
- * Copyright © 2016 Magento. All rights reserved.
- * See COPYING.txt for license details.
- */
-namespace Magento\SamplePaymentGateway\Observer;
+
+namespace Nexio\Payment\Observer;
 
 use Magento\Framework\Event\Observer;
-use Magento\Payment\Observer\AbstractDataAssignObserver;
+use Magento\Quote\Api\Data\PaymentInterface;
 
-class DataAssignObserver extends AbstractDataAssignObserver
+/**
+ * Class DataAssignObserver
+ * @package Nexio\Payment\Observer
+ */
+class DataAssignObserver extends \Magento\Payment\Observer\AbstractDataAssignObserver
 {
     /**
      * @param Observer $observer
-     * @return void
      */
     public function execute(Observer $observer)
     {
-        $method = $this->readMethodArgument($observer);
         $data = $this->readDataArgument($observer);
 
-        $paymentInfo = $method->getInfoInstance();
-
-        if ($data->getDataByKey('transaction_result') !== null) {
-            $paymentInfo->setAdditionalInformation(
-                'transaction_result',
-                $data->getDataByKey('transaction_result')
-            );
+        $additionalData = $data->getData(PaymentInterface::KEY_ADDITIONAL_DATA);
+        if (!is_array($additionalData) || (!@$additionalData['token'] && !@$additionalData['public_hash'])) {
+            return;
         }
+        $paymentInfo = $this->readPaymentModelArgument($observer);
+        $additionalInfo = $paymentInfo->getAdditionalInformation();
+        if (is_array($additionalInfo)) {
+            $additionalData = array_merge($additionalInfo, $additionalData);
+        }
+        $paymentInfo->setAdditionalInformation($additionalData);
     }
 }

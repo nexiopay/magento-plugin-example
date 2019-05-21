@@ -1,143 +1,215 @@
 <?xml version="1.0"?>
-<!--
-/**
- * Copyright © 2016 Magento. All rights reserved.
- * See COPYING.txt for license details.
- */
--->
-
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <!-- Payment Method Facade configuration -->
-    <virtualType name="SamplePaymentGatewayFacade" type="Magento\Payment\Model\Method\Adapter">
+    <!-- Facade -->
+    <virtualType name="NexioFacade" type="Magento\Payment\Model\Method\Adapter">
         <arguments>
-            <argument name="code" xsi:type="const">\Magento\SamplePaymentGateway\Model\Ui\ConfigProvider::CODE</argument>
             <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
-            <argument name="infoBlockType" xsi:type="string">Magento\SamplePaymentGateway\Block\Info</argument>
-            <argument name="valueHandlerPool" xsi:type="object">SamplePaymentGatewayValueHandlerPool</argument>
-            <argument name="commandPool" xsi:type="object">SamplePaymentGatewayCommandPool</argument>
+            <argument name="infoBlockType" xsi:type="string">Nexio\Payment\Block\Info</argument>
+            <argument name="code" xsi:type="const">Nexio\Payment\Model\Ui\ConfigProvider::CODE</argument>
+            <argument name="valueHandlerPool" xsi:type="object">NexioValueHandlerPool</argument>
+            <argument name="validatorPool" xsi:type="object">NexioValidatorPool</argument>
+            <argument name="commandPool" xsi:type="object">NexioCommandPool</argument>
         </arguments>
     </virtualType>
-
-    <!-- Configuration reader -->
-    <virtualType name="SamplePaymentGatewayConfig" type="Magento\Payment\Gateway\Config\Config">
+    <virtualType name="NexioCreditCardVaultFacade" type="Magento\Vault\Model\Method\Vault">
         <arguments>
-            <argument name="methodCode" xsi:type="const">\Magento\SamplePaymentGateway\Model\Ui\ConfigProvider::CODE</argument>
+            <argument name="config" xsi:type="object">NexioVaultPaymentConfig</argument>
+            <argument name="valueHandlerPool" xsi:type="object">NexioVaultPaymentValueHandlerPool</argument>
+            <argument name="vaultProvider" xsi:type="object">NexioFacade</argument>
+            <argument name="code" xsi:type="const">Nexio\Payment\Model\Ui\ConfigProvider::CC_VAULT_CODE</argument>
         </arguments>
     </virtualType>
+    <!-- End Facade -->
 
-    <!-- Logger, initialized with SamplePaymentGatewayConfig -->
-    <virtualType name="SamplePaymentGatewayLogger" type="Magento\Payment\Model\Method\Logger">
-        <arguments>
-            <argument name="config" xsi:type="object">SamplePaymentGatewayConfig</argument>
-        </arguments>
-    </virtualType>
-
-    <type name="Magento\SamplePaymentGateway\Gateway\Http\Client\ClientMock">
-        <arguments>
-            <argument name="logger" xsi:type="object">SamplePaymentGatewayLogger</argument>
-        </arguments>
-    </type>
-
-    <!-- Commands infrastructure -->
-    <virtualType name="SamplePaymentGatewayCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
+    <!-- Command Pool -->
+    <virtualType name="NexioCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="authorize" xsi:type="string">SamplePaymentGatewayAuthorizeCommand</item>
-                <item name="capture" xsi:type="string">SamplePaymentGatewayCaptureCommand</item>
-                <item name="void" xsi:type="string">SamplePaymentGatewayVoidCommand</item>
+                <item name="authorize" xsi:type="string">NexioAuthorizeCommand</item>
+                <item name="capture" xsi:type="string">NexioCaptureCommand</item>
+                <item name="refund" xsi:type="string">NexioRefundCommand</item>
+                <item name="vault_capture" xsi:type="string">NexioCaptureCommand</item>
+                <item name="get_one_time_use_token" xsi:type="string">NexioGetOneTimeUseTokenCommand</item>
+                <!--<item name="get_jwt" xsi:type="string">NexioGetJWTCommand</item>-->
             </argument>
         </arguments>
     </virtualType>
+    <!-- End Command Pool -->
 
-    <!-- Authorize command -->
-    <virtualType name="SamplePaymentGatewayAuthorizeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+    <!-- NexioFacade Configs-->
+    <virtualType name="NexioConfig" type="Magento\Payment\Gateway\Config\Config">
         <arguments>
-            <argument name="requestBuilder" xsi:type="object">SamplePaymentGatewayAuthorizationRequest</argument>
-            <argument name="handler" xsi:type="object">SamplePaymentGatewayResponseHandlerComposite</argument>
-            <argument name="transferFactory" xsi:type="object">Magento\SamplePaymentGateway\Gateway\Http\TransferFactory</argument>
-            <argument name="client" xsi:type="object">Magento\SamplePaymentGateway\Gateway\Http\Client\ClientMock</argument>
+            <argument name="methodCode" xsi:type="string">nexio</argument>
         </arguments>
     </virtualType>
+    <virtualType name="NexioValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">NexioConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="NexioConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">NexioConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="NexioValidatorPool" type="Magento\Payment\Gateway\Validator\ValidatorPool">
+        <arguments>
+            <argument name="validators" xsi:type="array">
+                <item name="country" xsi:type="string">NexioCountryValidator</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="NexioCountryValidator" type="Magento\Payment\Gateway\Validator\CountryValidator">
+        <arguments>
+            <argument name="config" xsi:type="object">NexioConfig</argument>
+        </arguments>
+    </virtualType>
+    <!-- End NexioFacade Configs-->
 
-    <!-- Authorization Request -->
-    <virtualType name="SamplePaymentGatewayAuthorizationRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
+    <!-- NexioVaultFacade Configs -->
+    <virtualType name="NexioVaultPaymentConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Nexio\Payment\Model\Ui\ConfigProvider::CC_VAULT_CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="NexioVaultPaymentValueHandlerPool" type="VaultPaymentValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">NexioVaultPaymentValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="NexioVaultPaymentValueHandler" type="VaultPaymentDefaultValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">NexioVaultPaymentConfig</argument>
+        </arguments>
+    </virtualType>
+    <!-- End NexioVaultFacade Configs -->
+
+    <!-- Config Gateway-->
+    <type name="Nexio\Payment\Gateway\Config\IsVaultEnabled">
+        <arguments>
+            <argument name="config" xsi:type="object">NexioVaultPaymentConfig</argument>
+            <argument name="key" xsi:type="string">active</argument>
+        </arguments>
+    </type>
+    <!-- End Config Gateway-->
+
+    <!-- Handlers -->
+    <virtualType name="NexioTransactionHandler" type="Magento\Payment\Gateway\Response\HandlerChain">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="payment_details" xsi:type="string">Nexio\Payment\Gateway\Response\PaymentDetailsHandler</item>
+                <item name="vault_details" xsi:type="string">Nexio\Payment\Gateway\Response\VaultDetailsHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="NexioRefundHandler" type="Magento\Payment\Gateway\Response\HandlerChain">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="payment_details" xsi:type="string">Nexio\Payment\Gateway\Response\Refund\PaymentDetailsHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <!-- End Handlers -->
+
+    <!-- Commands -->
+    <virtualType name="NexioTransactionCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">NexioCaptureRequest</argument>
+            <argument name="transferFactory" xsi:type="object">AuthorizeTransferFactory</argument>
+            <argument name="client" xsi:type="object">Nexio\Payment\Gateway\Http\Client\TransactionAuthorize</argument>
+            <argument name="validator" xsi:type="object">Nexio\Payment\Gateway\Validator\ResponseValidator</argument>
+            <argument name="handler" xsi:type="object">NexioTransactionHandler</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="NexioRefundCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">NexioRefundRequest</argument>
+            <argument name="transferFactory" xsi:type="object">NexioRefundTransferFactory</argument>
+            <argument name="client" xsi:type="object">Nexio\Payment\Gateway\Http\Client\TransactionRefund</argument>
+            <argument name="validator" xsi:type="object">Nexio\Payment\Gateway\Validator\ResponseValidator</argument>
+            <!--<argument name="handler" xsi:type="object">NexioRefundHandler</argument>-->
+        </arguments>
+    </virtualType>
+    <virtualType name="NexioAuthorizeCommand" type="NexioTransactionCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">NexioAuthorizeRequest</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="NexioCaptureCommand" type="NexioTransactionCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">NexioCaptureRequest</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="NexioGetOneTimeUseTokenCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">NexioGetOneTimeUseTokenRequest</argument>
+            <argument name="transferFactory" xsi:type="object">GetOneTimeUseTokenTransferFactory</argument>
+            <argument name="client" xsi:type="object">Nexio\Payment\Gateway\Http\Client\TransactionGetOneTimeUseToken</argument>
+        </arguments>
+    </virtualType>
+    <!-- End Commands-->
+
+    <!-- Request Builder -->
+    <type name="Nexio\Payment\Gateway\Request\AbstractDataBuilder">
+        <arguments>
+            <argument name="config" xsi:type="object">NexioConfig</argument>
+        </arguments>
+    </type>
+
+    <virtualType name="NexioAuthorizeRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
         <arguments>
             <argument name="builders" xsi:type="array">
-                <item name="transaction" xsi:type="string">Magento\SamplePaymentGateway\Gateway\Request\AuthorizationRequest</item>
-                <item name="mockData" xsi:type="string">Magento\SamplePaymentGateway\Gateway\Request\MockDataRequest</item>
+                <item name="data" xsi:type="string">Nexio\Payment\Gateway\Request\AuthorizeDataBuilder</item>
             </argument>
         </arguments>
     </virtualType>
-    <type name="Magento\SamplePaymentGateway\Gateway\Request\AuthorizationRequest">
+    <virtualType name="NexioCaptureRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
         <arguments>
-            <argument name="config" xsi:type="object">SamplePaymentGatewayConfig</argument>
-        </arguments>
-    </type>
-
-    <!-- Capture command -->
-    <virtualType name="SamplePaymentGatewayCaptureCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
-        <arguments>
-            <argument name="requestBuilder" xsi:type="object">Magento\SamplePaymentGateway\Gateway\Request\CaptureRequest</argument>
-            <argument name="handler" xsi:type="object">Magento\SamplePaymentGateway\Gateway\Response\TxnIdHandler</argument>
-            <argument name="transferFactory" xsi:type="object">Magento\SamplePaymentGateway\Gateway\Http\TransferFactory</argument>
-            <argument name="validator" xsi:type="object">Magento\SamplePaymentGateway\Gateway\Validator\ResponseCodeValidator</argument>
-            <argument name="client" xsi:type="object">Magento\SamplePaymentGateway\Gateway\Http\Client\ClientMock</argument>
-        </arguments>
-    </virtualType>
-
-    <!-- Capture Request -->
-    <type name="Magento\SamplePaymentGateway\Gateway\Request\CaptureRequest">
-        <arguments>
-            <argument name="config" xsi:type="object">SamplePaymentGatewayConfig</argument>
-        </arguments>
-    </type>
-
-    <!-- Void command -->
-    <virtualType name="SamplePaymentGatewayVoidCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
-        <arguments>
-            <argument name="requestBuilder" xsi:type="object">Magento\SamplePaymentGateway\Gateway\Request\VoidRequest</argument>
-            <argument name="handler" xsi:type="object">Magento\SamplePaymentGateway\Gateway\Response\TxnIdHandler</argument>
-            <argument name="transferFactory" xsi:type="object">Magento\SamplePaymentGateway\Gateway\Http\TransferFactory</argument>
-            <argument name="validator" xsi:type="object">Magento\SamplePaymentGateway\Gateway\Validator\ResponseCodeValidator</argument>
-            <argument name="client" xsi:type="object">Magento\SamplePaymentGateway\Gateway\Http\Client\ClientMock</argument>
-        </arguments>
-    </virtualType>
-
-    <!-- Void Request -->
-    <type name="Magento\SamplePaymentGateway\Gateway\Request\VoidRequest">
-        <arguments>
-            <argument name="config" xsi:type="object">SamplePaymentGatewayConfig</argument>
-        </arguments>
-    </type>
-
-    <!-- Response handlers -->
-    <virtualType name="SamplePaymentGatewayResponseHandlerComposite" type="Magento\Payment\Gateway\Response\HandlerChain">
-        <arguments>
-            <argument name="handlers" xsi:type="array">
-                <item name="txnid" xsi:type="string">Magento\SamplePaymentGateway\Gateway\Response\TxnIdHandler</item>
-                <item name="fraud" xsi:type="string">Magento\SamplePaymentGateway\Gateway\Response\FraudHandler</item>
+            <argument name="builders" xsi:type="array">
+                <item name="data" xsi:type="string">Nexio\Payment\Gateway\Request\CaptureDataBuilder</item>
             </argument>
         </arguments>
     </virtualType>
-
-    <!-- Value handlers infrastructure -->
-    <virtualType name="SamplePaymentGatewayValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+    <virtualType name="NexioGetOneTimeUseTokenRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
         <arguments>
-            <argument name="handlers" xsi:type="array">
-                <item name="default" xsi:type="string">SamplePaymentGatewayConfigValueHandler</item>
+            <argument name="builders" xsi:type="array">
+                <item name="data" xsi:type="string">Nexio\Payment\Gateway\Request\GetOneTimeUseTokenDataBuilder</item>
             </argument>
         </arguments>
     </virtualType>
-    <virtualType name="SamplePaymentGatewayConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+    <virtualType name="NexioRefundRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
         <arguments>
-            <argument name="configInterface" xsi:type="object">SamplePaymentGatewayConfig</argument>
+            <argument name="builders" xsi:type="array">
+                <item name="data" xsi:type="string">Nexio\Payment\Gateway\Request\RefundDataBuilder</item>
+            </argument>
         </arguments>
     </virtualType>
+    <!-- End Request Builder-->
 
-    <type name="Magento\SamplePaymentGateway\Block\Info">
+    <!-- Transfer Factory-->
+    <type name="Nexio\Payment\Gateway\Http\TransferFactory">
         <arguments>
-            <argument name="config" xsi:type="object">SamplePaymentGatewayConfig</argument>
+            <argument name="config" xsi:type="object">NexioConfig</argument>
         </arguments>
     </type>
-
+    <virtualType name="AuthorizeTransferFactory" type="Nexio\Payment\Gateway\Http\TransferFactory">
+        <arguments>
+            <argument name="action" xsi:type="const">Nexio\Payment\Gateway\Http\TransferFactory::ACTION_AUTHORIZE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="NexioRefundTransferFactory" type="Nexio\Payment\Gateway\Http\TransferFactory">
+        <arguments>
+            <argument name="action" xsi:type="const">Nexio\Payment\Gateway\Http\TransferFactory::ACTION_REFUND</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="GetOneTimeUseTokenTransferFactory" type="Nexio\Payment\Gateway\Http\TransferFactory">
+        <arguments>
+            <argument name="action" xsi:type="const">Nexio\Payment\Gateway\Http\TransferFactory::GET_ONE_TIME_USE_TOKEN</argument>
+        </arguments>
+    </virtualType>
+    <!-- End Transfer Factory-->
 </config>

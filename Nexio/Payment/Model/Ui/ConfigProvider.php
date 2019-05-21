@@ -1,19 +1,33 @@
 <?php
-/**
- * Copyright © 2016 Magento. All rights reserved.
- * See COPYING.txt for license details.
- */
-namespace Magento\SamplePaymentGateway\Model\Ui;
+namespace Nexio\Payment\Model\Ui;
 
 use Magento\Checkout\Model\ConfigProviderInterface;
-use Magento\SamplePaymentGateway\Gateway\Http\Client\ClientMock;
+use Magento\Framework\App\ObjectManager;
+use Magento\Framework\UrlInterface;
 
 /**
  * Class ConfigProvider
  */
-final class ConfigProvider implements ConfigProviderInterface
+class ConfigProvider implements ConfigProviderInterface
 {
-    const CODE = 'sample_gateway';
+    const CODE = 'nexio';
+
+    const CC_VAULT_CODE = 'nexio_vault';
+
+    /**
+     * @var UrlInterface
+     */
+    protected $urlBuilder;
+
+    /**
+     * ConfigProvider constructor.
+     * @param UrlInterface $urlBuilder
+     */
+    public function __construct(
+        UrlInterface $urlBuilder
+    ) {
+        $this->urlBuilder = $urlBuilder;
+    }
 
     /**
      * Retrieve assoc array of checkout configuration
@@ -22,15 +36,50 @@ final class ConfigProvider implements ConfigProviderInterface
      */
     public function getConfig()
     {
-        return [
+        $return = [
             'payment' => [
                 self::CODE => [
-                    'transactionResults' => [
-                        ClientMock::SUCCESS => __('Success'),
-                        ClientMock::FAILURE => __('Fraud')
-                    ]
+                    'isActive' => true,
+                    'getIframeUrl' => $this->getIframeUrl(),
+                    'iframeBaseUrl' => $this->baseIframeUrl()
                 ]
             ]
         ];
+        return $return;
+    }
+
+    /**
+     * @return mixed|string
+     */
+    private function baseIframeUrl()
+    {
+        /** @var \Nexio\Payment\Gateway\Http\TransferFactory $transfer */
+        $transfer = ObjectManager::getInstance()->create(
+            \Nexio\Payment\Gateway\Http\TransferFactory::class,
+            ['action' => \Nexio\Payment\Gateway\Http\TransferFactory::GET_BASE_IFRAME_URL]
+        );
+        $url = $transfer->getUrl() . '?token=';
+        if ($this->isForceIframeUrlSecure()) {
+            $url = str_replace('http://', 'https://', $url);
+        }
+        return $url;
+    }
+
+    /**
+     * @return string
+     */
+    private function getIframeUrl()
+    {
+        return $this->urlBuilder->getUrl(
+            'nexio/checkout/iframeConfig',
+            ['_secure' => true]);
+    }
+
+    /**
+     * @return bool
+     */
+    private function isForceIframeUrlSecure()
+    {
+        return false;
     }
 }
