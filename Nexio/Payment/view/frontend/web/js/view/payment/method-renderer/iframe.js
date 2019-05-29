@@ -64,15 +64,37 @@ define(
                     fullScreenLoader.startLoader();
                 }
                 if (!self.hasModal()) {
+			var postdata = {
+				'billingAddress':{
+					'firstname':quote.billingAddress().firstname,
+					'lastname':quote.billingAddress().lastname,
+					'street1':quote.billingAddress().street[0],
+					'street2':quote.billingAddress().street[1],
+					'city':quote.billingAddress().city,
+					'regionCode':quote.billingAddress().regionCode,
+					'postcode':quote.billingAddress().postcode,
+					'countryId':quote.billingAddress().countryId
+				},
+				'totals':{
+				    'base_currency_code':quote.totals().base_currency_code,
+				    'base_grand_total':quote.totals().base_grand_total
+				}
+			};
+			var getsecreturl = self.getSecretUrl();//url.build('rest/V1/hello/loadsecret').replace('index.php/','');
+			console.log('URL: ' + getsecreturl);
+			//console.log('postdata:' +quote.billingAddress().firstname + ' ' + quote.billingAddress().lastname);
+			//console.log('total: '+quote.totals().base_currency_code + ', amount: ' + quote.totals().base_grand_total);
                     $.ajax({
-                        url: self.getIframeUrl(),
+                        url: getsecreturl,//self.getIframeUrl(),
                         showLoader: true,
-                        data: {
+                        data: JSON.stringify(postdata),
+			            /*{
                             billingAddress: JSON.stringify(quote.billingAddress()),
                             totals: quote.totals(),
                             items: quote.getItems()
-                        },
-                        type: 'POST'
+                        },*/
+                        type: 'POST'//,
+			            //contentType:"application/json; charset=utf-8"
                     }).done(function (response) {
                         if (response) {
                             var iframeBaseUrl = self.iframeBaseUrl(),
@@ -100,27 +122,33 @@ define(
                 }
 
                 if (this.validate() && additionalValidators.validate()) {
+                //if (this.validate()) {
+                    console.log('this.validate passed');
                     this.isPlaceOrderActionAllowed(false);
 
+                    //skip getPlaceOrderDeferredObject first
+                    
                     this.getPlaceOrderDeferredObject()
                         .fail(
                             function () {
+                                console.log('getPlaceOrderDeferredObject failed');
                                 fullScreenLoader.stopLoader();
                                 self.isPlaceOrderActionAllowed(true);
                             }
                         ).done(
-                        function () {
-                            self.afterPlaceOrder();
+                            function () {
+                                console.log('getPlaceOrderDeferredObject success');
+                                self.afterPlaceOrder();
 
-                            if (self.redirectAfterPlaceOrder) {
-                                redirectOnSuccessAction.execute();
+                                if (self.redirectAfterPlaceOrder) {
+                                    redirectOnSuccessAction.execute();
+                                }
                             }
-                        }
-                    );
-
+                        );
+                    
                     return true;
                 }
-
+                console.log('this.validate failed');
                 return false;
             },
             isVaultEnabled: function () {
@@ -193,22 +221,22 @@ define(
                             break;
                         }
                         self.isValid(isValid);
-                    } else if (data.event === 'success') {
+                    //} else if (data.event === 'success') {
                     } else if (data.event === 'processed') {//else if (data.event === 'cardSaved') {
-			    console.log('get data success from Nexio: ' + JSON.stringify(data));
-                        if (data.data.token.success) {
-                            self.savedCard = data.data;
+			            console.log('get data success from Nexio: ' + JSON.stringify(data));
+                        //if (data.data.token.success) {
+                            //self.savedCard = data.data;
                             // fullScreenLoader.startLoader();
                             self.closeModal();
                             self.iframeLoaded = false;
                             self.placeOrder();
-			    //todo need add notes like payment status, batch no etc 
-                        } else {
-                            self.alertError(
-                                $t('Something went wrong. Please try again later.'),
-                                url.build('checkout/cart/')
-                            );
-                        }
+			                //todo need add notes like payment status, batch no etc 
+                        //} else {
+                         //   self.alertError(
+                         //       $t('Something went wrong. Please try again later.'),
+                         //       url.build('checkout/cart/')
+                          //  );
+                        //}
                     } else if (data.event === 'loaded') {
                         self.iframeLoaded = true;
                         fullScreenLoader.stopLoader();
@@ -271,8 +299,12 @@ define(
             },
             getIframeUrl: function () {
                 return window.checkoutConfig.payment[this.getCode()].getIframeUrl;
+            },
+            getSecretUrl: function(){
+                return window.checkoutConfig.payment[this.getCode()].getSecretUrl;
             }
         });
     }
 );
+
 

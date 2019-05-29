@@ -2,6 +2,7 @@
 
 namespace Nexio\Payment\Gateway\Http\Client;
 
+use Magento\Payment\Gateway\ConfigInterface;
 
 /**
  * Class TransactionGetOneTimeUseToken
@@ -15,6 +16,7 @@ class TransactionGetOneTimeUseToken extends AbstractTransaction
      * @var \Magento\Framework\Registry
      */
     protected $registry;
+    
 
     /**
      * TransactionGetOneTimeUseToken constructor.
@@ -30,6 +32,7 @@ class TransactionGetOneTimeUseToken extends AbstractTransaction
         \Zend\Http\ClientFactory $clientFactory,
         \Zend\Http\RequestFactory $requestFactory,
         \Zend\Http\HeadersFactory $headersFactory
+        
     )
     {
         parent::__construct($logger, $clientFactory, $requestFactory, $headersFactory);
@@ -48,7 +51,8 @@ class TransactionGetOneTimeUseToken extends AbstractTransaction
         $token = '';
         if (@$result['phrase'] === 'OK') {
             $body = json_decode(@$result['body'], JSON_OBJECT_AS_ARRAY);
-            $token = @$body['token'];
+	    $token = @$body['token'];
+	    $this->logger->addDebug("Get Token has no problem");
         } else {
             $this->logger->addDebug(
                 "Error when processing get one time use token: \n" .
@@ -58,4 +62,7 @@ class TransactionGetOneTimeUseToken extends AbstractTransaction
         }
         $this->registry->register(self::NEXIO_ONE_TIME_USE_TOKEN_KEY, $token);
     }
+
+
 }
+

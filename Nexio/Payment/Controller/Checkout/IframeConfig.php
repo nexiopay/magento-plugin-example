@@ -17,10 +17,25 @@ class IframeConfig extends AbstractCheckoutController
      */
     public function execute()
     {
+        $this->logger->addDebug('iFrameController is called');	   
         $controllerResult = $this->resultFactory->create(ResultFactory::TYPE_JSON);
-        $postParams = $this->getRequest()->getPostValue();
+	$postParams = rawurldecode(file_get_contents('php://input'));//$this->getRequest()->getPostValue();
+	$jsonparm = json_decode($postParams,true);
+	$this->logger->addDebug('body: '.$postParams);
+
         try {
-            if (@$postParams['billingAddress'] &&
+		if(!is_null($jsonparm) && !empty($jsonparm['billingAddress']) && !empty($jsonparm['totals']))
+		{
+			$this->commandPool->get(TransferFactory::GET_ONE_TIME_USE_TOKEN)->execute($jsonparm);
+               		 $result = $this->registry->registry(TransactionGetOTUT::NEXIO_ONE_TIME_USE_TOKEN_KEY);
+
+		}
+		else
+		{
+			$result = false;
+		}
+		/*
+		if (@$postParams['billingAddress'] &&
                 json_decode(@$postParams['billingAddress'], true) &&
                 is_array(json_decode(@$postParams['billingAddress'], true))) {
                 $postParams['billingAddress'] = json_decode(@$postParams['billingAddress'], true);
@@ -28,7 +43,7 @@ class IframeConfig extends AbstractCheckoutController
                 $result = $this->registry->registry(TransactionGetOTUT::NEXIO_ONE_TIME_USE_TOKEN_KEY);
             } else {
                 $result = false;
-            }
+	    }*/
         } catch (\Exception $e) {
             $result = false;
             $this->logger->addDebug("Exception when getting token: " . $e->getMessage());

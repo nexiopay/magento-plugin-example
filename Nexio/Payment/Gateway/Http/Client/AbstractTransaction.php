@@ -1,7 +1,7 @@
 <?php
 
 namespace Nexio\Payment\Gateway\Http\Client;
-
+use Magento\Payment\Gateway\ConfigInterface;
 /**
  * Class AbstractTransaction
  * @package Nexio\Payment\Gateway\Http\Client
@@ -28,6 +28,7 @@ abstract class AbstractTransaction implements \Magento\Payment\Gateway\Http\Clie
      */
     protected $requestFactory;
 
+
     /**
      * AbstractTransaction constructor.
      * @param \Nexio\Payment\Logger\Logger $logger
@@ -39,12 +40,12 @@ abstract class AbstractTransaction implements \Magento\Payment\Gateway\Http\Clie
         \Nexio\Payment\Logger\Logger $logger,
         \Zend\Http\ClientFactory $clientFactory,
         \Zend\Http\RequestFactory $requestFactory,
-        \Zend\Http\HeadersFactory $headersFactory
+	\Zend\Http\HeadersFactory $headersFactory
     ) {
         $this->logger = $logger;
         $this->clientFactory = $clientFactory;
         $this->headersFactory = $headersFactory;
-        $this->requestFactory = $requestFactory;
+	$this->requestFactory = $requestFactory;
     }
 
     /**

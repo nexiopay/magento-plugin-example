@@ -43,17 +43,35 @@ class GetOneTimeUseTokenDataBuilder extends AbstractDataBuilder
     const CREDIT_CARD = 'creditCard';
     const SALE = 'sale';
 
+    const CARD = 'card';
+    const CARDHOLDER_NAME = 'cardHolderName';
+
+    const CHECK_FRAUD = 'checkFraud';
+    const VERBOSE_RESPONSE = 'verboseResponse';
+    const SAVE_CARD_TOKEN = 'saveCardToken';
+
+    const DISPLAY_SUBMITBUTTON = 'displaySubmitButton';
+    const HIDE_CVC = 'hideCvc';
+    const REQUIRE_CVC = 'requireCvc';
+    const HIDE_BILLING = 'hideBilling';
+    const CUSTOM_TEXT_URL = 'customTextUrl';
+    const PROCESSING_OPTIONS = 'processingOptions';
+    const AUTH_ONLY = 'isAuthOnly';
+    const WEBHOOK_URL = 'webhookUrl';
+    const WEBHOOKFAIL_URL = 'webhookFailUrl';
+
+
     /**
      * @param array $buildSubject
      * @return array
      */
     public function build(array $buildSubject)
     {
-        $items = $buildSubject['items'];
+       // $items = $buildSubject['items'];
         $totals = $buildSubject['totals'];
         $billingAddress = $buildSubject['billingAddress'];
 
-        $cartItems = [];
+        /*$cartItems = [];
         foreach ($items as $item) {
             $cartItem = [];
             $cartItem[self::ITEM] = @$item['sku'];
@@ -62,7 +80,7 @@ class GetOneTimeUseTokenDataBuilder extends AbstractDataBuilder
             $cartItem[self::PRICE] = @$item['base_row_total_incl_tax'];
             $cartItem[self::TYPE] = self::SALE;
             $cartItems[] = $cartItem;
-        }
+	}*/
         $result = [
             self::DATA => [
                 self::PAYMENT_METHOD     => self::CREDIT_CARD,
@@ -79,26 +97,64 @@ class GetOneTimeUseTokenDataBuilder extends AbstractDataBuilder
                 self::CUSTOMER           => [
                     self::FIRST_NAME          => @$billingAddress['firstname'],
                     self::LAST_NAME           => @$billingAddress['lastname'],
-                    self::BILL_TO_ADDRESS_ONE => @$billingAddress['street'][0],
-                    self::BILL_TO_ADDRESS_TWO => @$billingAddress['street'][1],
+                    self::BILL_TO_ADDRESS_ONE => @$billingAddress['street1'],//[0],
+                    //self::BILL_TO_ADDRESS_TWO => @$billingAddress['street'][1],
                     self::BILL_TO_CITY        => @$billingAddress['city'],
                     self::BILL_TO_STATE       => @$billingAddress['regionCode'],
                     self::BILL_TO_POSTAL      => @$billingAddress['postcode'],
                     self::BILL_TO_COUNTRY     => @$billingAddress['countryId'],
-                ],
-                self::CART               => [
-                    self::ITEMS => $cartItems
-                ]
+                ]//,
+                //self::CART               => [
+                //    self::ITEMS => $cartItems
+               // ]
             ]
         ];
-        if (!empty($cssLink = $this->getCustomCss())) {
-            $result[self::UI_OPTIONS] = [
-                self::CSS => $this->getCustomCss()
-            ];
-        }
 
+        //processing_options
+        
+        $result[self::PROCESSING_OPTIONS] = [
+            self::WEBHOOK_URL => "https://".$_SERVER['HTTP_HOST']."/rest/V1/hello/test",
+            self::CHECK_FRAUD => $this->getFraudCheck()?true:false,
+            self::VERBOSE_RESPONSE => false,
+            self::SAVE_CARD_TOKEN => false,
+            //todo callback URL and failure callback url
+        ];
+
+
+        //uiOptions
+        $css = $this->getCustomCss();
+        if(empty($css))
+            $css = '';
+
+        $hidecvc = $this->getHideCvc()?true:false;
+        $requirecvc = $this->getRequireCvc()?true:false;
+        $hidebilling = $this->getHideBilling()?true:false;  
+        $customtexturl = $this->getCustomTextFile();
+        if(empty($customtexturl))
+            $customtexturl = '';
+
+        $result[self::UI_OPTIONS] = [
+            self::CSS => $css,
+            self::DISPLAY_SUBMITBUTTON => false,
+            self::HIDE_CVC => $hidecvc,
+            self::REQUIRE_CVC => $requirecvc,
+            self::HIDE_BILLING => $hidebilling,
+            self::CUSTOM_TEXT_URL => $customtexturl,
+        ];
+
+
+        //card
+        $result[self::CARD] = [
+            self::CARDHOLDER_NAME => @$billingAddress['firstname'].' '.@$billingAddress['lastname'],
+        ];
+
+        //isAuthOnly
+        $result[self::AUTH_ONLY] = $this->getAuthOnly()?true:false;
+
+        //todo custom fields
+        //Mage::helper('core/url')->getCurrentUrl();
         return $result;
     }
 
-   
 }
+

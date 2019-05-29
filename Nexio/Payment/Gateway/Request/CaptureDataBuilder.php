@@ -27,13 +27,14 @@ class CaptureDataBuilder extends AbstractDataBuilder
         $currency = $order->getCurrencyCode();
 
         $return = [
+            //todo this one need change too
             'isAuthOnly' => false,
-            'tokenex' => [
-                'token' => $token
-            ],
+            //'tokenex' => [
+            //    'token' => $token
+            //],
             'data' => [
-                'amount' => SubjectReader::readAmount($buildSubject),
-                'partialAmount' => SubjectReader::readAmount($buildSubject),
+                //'amount' => SubjectReader::readAmount($buildSubject),
+                //'partialAmount' => SubjectReader::readAmount($buildSubject),
                 'currency' => $currency
             ]
         ];
@@ -44,3 +45,4 @@ class CaptureDataBuilder extends AbstractDataBuilder
         return $return;
     }
 }
+

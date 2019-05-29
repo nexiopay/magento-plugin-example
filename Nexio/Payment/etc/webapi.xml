@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/hello/name/:name" method="POST">
+        <service class="Nexio\Payment\Webapi\HelloInterface" method="name"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    <route url="/V1/hello/test" method="POST">
+        <service class="Nexio\Payment\Webapi\HelloInterface" method="test"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+	</route>
+ <route url="/V1/hello/loadsecret" method="POST">
+        <service class="Nexio\Payment\Webapi\HelloInterface" method="loadsecret"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+</routes>

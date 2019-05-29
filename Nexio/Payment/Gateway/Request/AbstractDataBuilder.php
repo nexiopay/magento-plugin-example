@@ -83,19 +83,19 @@ abstract class AbstractDataBuilder implements BuilderInterface
     }
 
     protected function getFraudCheck(){
-        return $this->config-getValue('fraud_check');
+        return $this->config->getValue('fraud_check');
     }
 
     protected function getHideCvc(){
-        return $this->config-getValue('hide_cvc');
+        return $this->config->getValue('hide_cvc');
     }
 
     protected function getRequireCvc(){
-        return $this->config-getValue('require_cvc');
+        return $this->config->getValue('require_cvc');
     }
 
     protected function getHideBilling(){
-        return $this->config-getValue('hide_billing');
+        return $this->config->getValue('hide_billing');
     }
 
     protected function getCustomTextFile(){
@@ -103,7 +103,8 @@ abstract class AbstractDataBuilder implements BuilderInterface
     }
 
     protected function getAuthOnly(){
-        return $this->config-getValue('auth_only');
+        return $this->config->getValue('auth_only');
     }
 
 }
+
