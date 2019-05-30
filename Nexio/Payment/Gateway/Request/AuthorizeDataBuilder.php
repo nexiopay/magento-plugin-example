@@ -30,12 +30,11 @@ class AuthorizeDataBuilder extends AbstractDataBuilder
 
         return [
             'isAuthOnly' => true,
-            //'tokenex' => [
-            //    'token' => $token
-            //],
+            'tokenex' => [
+                'token' => "test token value"
+            ],
             'data' => [
-                //'amount' => SubjectReader::readAmount($buildSubject),
-                //'partialAmount' => SubjectReader::readAmount($buildSubject),
+                'amount' => 0.99,
                 'currency' => $currency
             ]
         ];

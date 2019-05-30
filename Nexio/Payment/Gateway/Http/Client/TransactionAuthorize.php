@@ -16,7 +16,9 @@ class TransactionAuthorize extends AbstractTransaction
      * @return array
      */
     public function process($uri, array $headers, array $data)
-    {
+    {   
+        $this->logger->addDebug("Begin Auth trans process");
+        /*
         $result = parent::process($uri, $headers, $data);
         if (@$result['phrase'] === 'OK') {
             $result['body'] = json_decode(@$result['body'], JSON_OBJECT_AS_ARRAY);
@@ -33,6 +35,17 @@ class TransactionAuthorize extends AbstractTransaction
             );
             $this->logger->addDebug("Body was sent: \n" . print_r($data, true));
         }
+        */
+        $body = array(
+            "result" => "this is a test"
+        );
+
+        $response['status_code'] = 200;
+        $response['phrase'] = 'OK';
+        $response['body'] = json_encode($body);
+
+        
+
         return $result;
     }
 }

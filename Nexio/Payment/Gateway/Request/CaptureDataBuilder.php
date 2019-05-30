@@ -33,7 +33,7 @@ class CaptureDataBuilder extends AbstractDataBuilder
             //    'token' => $token
             //],
             'data' => [
-                //'amount' => SubjectReader::readAmount($buildSubject),
+                'amount' => SubjectReader::readAmount($buildSubject),
                 //'partialAmount' => SubjectReader::readAmount($buildSubject),
                 'currency' => $currency
             ]
