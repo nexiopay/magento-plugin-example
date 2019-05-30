@@ -19,6 +19,7 @@ class ConfigProvider implements ConfigProviderInterface
      */
     protected $urlBuilder;
 
+
     /**
      * ConfigProvider constructor.
      * @param UrlInterface $urlBuilder
@@ -41,8 +42,8 @@ class ConfigProvider implements ConfigProviderInterface
                 self::CODE => [
                     'isActive' => true,
                     'getIframeUrl' => $this->getIframeUrl(),
-		    'iframeBaseUrl' => $this->baseIframeUrl(),
-		    'getSecretUrl' => $this->getSecretUrl()
+		            'iframeBaseUrl' => $this->baseIframeUrl(),
+		            'getSecretUrl' => $this->getSecretUrl()
                 ]
             ]
         ];
@@ -90,7 +91,7 @@ class ConfigProvider implements ConfigProviderInterface
     private function getSecretUrl()
     {
         return $this->urlBuilder->getUrl(
-            'nexio/checkout/getsecret',
+            'nexio/checkout/getsecretConfig',
             ['_secure' => true]);
     }
 

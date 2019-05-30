@@ -17,16 +17,18 @@
                 <can_void>0</can_void>
                 <can_cancel>1</can_cancel>
                 <cctypes>AE,VI,MC,DI</cctypes>
-                <custom_css>https://tester.transactionplatformdev.com/example.css</custom_css>
+                <custom_css></custom_css>
                 <allowspecific>1</allowspecific>
                 <specificcountry>US</specificcountry>
                 <order_status>processing</order_status>
+                <merchant_id></merchant_id>
                 <customer_textfile></customer_textfile>
                 <fraud_check>0</fraud_check>
                 <require_cvc>1</require_cvc>
                 <hide_cvc>0</hide_cvc>
                 <hide_billing>0</hide_billing>
                 <auth_only>0</auth_only>
+                <verify_signature>1</verify_signature>
             </nexio>
             <nexio_vault>
                 <active>1</active>

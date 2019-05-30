@@ -7,7 +7,6 @@ use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Payment\Gateway\Command\CommandPoolInterface;
 use Magento\Payment\Gateway\ConfigInterface;
-
 /**
  * Class AbstractCheckoutController
  * @package Nexio\Payment\Controller\Checkout
@@ -44,6 +43,8 @@ abstract class AbstractCheckoutController extends Action
      */
     protected $logger;
 
+    protected $encryptor;
+
     /**
      * AbstractCheckoutController constructor.
      * @param Context $context
@@ -59,13 +60,15 @@ abstract class AbstractCheckoutController extends Action
         CustomerSession $customerSession,
         CommandPoolInterface $commandPool,
         \Nexio\Payment\Logger\Logger $logger,
-        \Magento\Framework\Registry $registry
+        \Magento\Framework\Registry $registry,
+        \Magento\Framework\Encryption\EncryptorInterface $encryptor
     ) {
         $this->customerSession = $customerSession;
         $this->commandPool = $commandPool;
         $this->registry = $registry;
         $this->logger = $logger;
         $this->config = $config;
+        $this->encryptor = $encryptor;
         parent::__construct($context);
     }
 }

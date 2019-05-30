@@ -55,83 +55,47 @@ class Hello implements HelloInterface
         $this->logger->addDebug('load secret works!!!');
         
         
-        $result = $this->get_secret() ;
-        
-        if($result === "error")
-        {
-            $this->logger->addDebug('load secret get error!!!');
-            return false;
-        }
-        else
-        {
-            $this->logger->addDebug('get secret: '.$result);
-            return true;
-        }
+        $result = $this->callGetSecret() ;
         
 
     }
 
-	/**
-	 * get_secret
-	 * get the share secret of merchant
-	 * @since 0.0.5
-	 * @return string
-	 * 
-	 */
-    
-	private function get_secret()
-	{
-		try {
-			$basicauth = $this->getAuthorization();//"Basic ". base64_encode($this->user_name . ":" . $this->password);
-            $this->logger->addDebug("basicauth is: ".$basicauth);
-            $requesturl = "https://api.nexiopaysandbox.com/webhook/v3/merchantWebhookSecret/100039";//$this->getUrl('webhook/v3/merchantWebhookSecret/'.'100039');
-            $this->logger->addDebug("requesturl is: ".$requesturl);
-			$ch = curl_init($requesturl);
+    private function callGetSecret()
+    {
+        try {
+            $requesturl = "https://".$_SERVER['HTTP_HOST']."/index.php/nexio/checkout/getsecretConfig/?command=getsecret";//"https://mag.cmsshanghaidev.com/index.php/nexio/checkout/getsecretConfig/";//$this->getUrl('webhook/v3/merchantWebhookSecret/'.'100039');
+            $this->logger->addDebug("HTTP requesturl is: ".$requesturl);
+            $ch = curl_init($requesturl);
+            
+            $request = array(
+                'command' => 'getsecret'
+            );
+            $data = json_encode($request);
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-			
+			//curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-				"Authorization: $basicauth",
-				"Content-Type: application/json"));
+                "Content-Type: application/json"));//,
+               // "Content-Length: " . strlen($data)
+                //));
 			$result = curl_exec($ch);
 			$error = curl_error($ch);
 			curl_close($ch);
 			
-			$this->logger->addDebug('get secret response: '.$result);
+			$this->logger->addDebug('Hello get secret response: '.$result);
 			if ($error) {
-				$this->logger->addDebug("get secret get error, return error");
-				return "error";
-			} else {
-                if(!empty(json_decode($result)->error) || empty(json_decode($result)->secret))
-                {
-                    $this->logger->addDebug("no correct message, return error");
-				    return "error";
-                }
-
-                /*
-				if(json_decode($result)->error)
-				{
-					
-					return "error";
-                }*/
+				$this->logger->addDebug("Hello get secret get error, return error");
 				
-				$secret = json_decode($result)->secret;
-				error_log('get secret: '.$secret);
-				return $secret;
+			} else {
+                //do nothing
+                $this->logger->addDebug("Hello get secret success");
 			}
 		} catch (Exception $e) {
 			
-			$this->logger->addDebug("Get secret failed:".$e->getMessage(),0);
+			$this->logger->addDebug("Hello Get secret failed:".$e->getMessage(),0);
 			return "error";
 		}
     }
-    
-   
-    /**
-     * @return string
-     */
-    private function getAuthorization()
-    {
-        return 'Basic ' . base64_encode("samlu@cmsonline.com" . ':' . "Lujunji@791218");
-    }
+
+	
 }
