@@ -66,6 +66,7 @@ define(
                 if (!self.hasModal()) {
                     var postdata = {
                         'billingAddress':{
+                            'ordernumber':quote.getQuoteId(),
                             'firstname':quote.billingAddress().firstname,
                             'lastname':quote.billingAddress().lastname,
                             'street1':quote.billingAddress().street[0],
@@ -114,6 +115,7 @@ define(
             beforePlaceOrder: function () {
                 var self = this;
                 self.placeOrder();
+                //self.showiFrame();
                 /*
                 self.alertError(
                     $t('Nothing happens, hahaha!'),
@@ -170,6 +172,35 @@ define(
             },
             afterPlaceOrder: function() {
                 var self = this;
+                //todo , call getsecret to check if checkout session can makes me get orderid or not
+                var postdata = {
+                    'billingAddress':{
+                        'ordernumber':quote.getQuoteId(),
+                        'firstname':quote.billingAddress().firstname,
+                        'lastname':quote.billingAddress().lastname,
+                        'street1':quote.billingAddress().street[0],
+                        'street2':quote.billingAddress().street[1],
+                        'city':quote.billingAddress().city,
+                        'regionCode':quote.billingAddress().regionCode,
+                        'postcode':quote.billingAddress().postcode,
+                        'countryId':quote.billingAddress().countryId
+                    },
+                    'totals':{
+                        'base_currency_code':quote.totals().base_currency_code,
+                        'base_grand_total':quote.totals().base_grand_total
+                    }
+                };
+                $.ajax({
+                    url: self.getSecretUrl(),
+                    showLoader: true,
+                    data: JSON.stringify(postdata),
+                    type: 'POST',
+                    contentType:"application/json; charset=utf-8"
+                }).done(function (response) {
+                    console.log("get secret called success!!!");
+                }).fail(function() {
+                    console.log("get secret called failed!!!");
+                });
                 console.log("this is after Place Order function, need call iFrame here");
                 return false;
             },
@@ -251,7 +282,8 @@ define(
                             // fullScreenLoader.startLoader();
                             self.closeModal();
                             self.iframeLoaded = false;
-                            self.placeOrder();
+                            
+                            
 			                //todo need add notes like payment status, batch no etc 
                         //} else {
                          //   self.alertError(
@@ -328,5 +360,6 @@ define(
         });
     }
 );
+
 
 

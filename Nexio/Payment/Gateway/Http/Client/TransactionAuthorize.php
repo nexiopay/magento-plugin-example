@@ -49,3 +49,4 @@ class TransactionAuthorize extends AbstractTransaction
         return $result;
     }
 }
+

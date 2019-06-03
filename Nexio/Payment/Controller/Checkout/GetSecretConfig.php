@@ -29,7 +29,20 @@ class GetSecretConfig extends AbstractCheckoutController
             $command = $_GET["command"];
             $this->logger->addDebug('parameter: '. $_GET["command"]);
         }
-        
+
+        if(is_null($this->checkoutSession))
+        {
+            $this->logger->addDebug('checkout session is null');
+        }
+        else
+        {
+            $this->logger->addDebug('checkout session is not null!!'); 
+        }
+
+	$order = $this->checkoutSession->getLastRealOrder();
+
+        $orderId=$order->getEntityId();
+	$this->logger->addDebug('order id is :'.$orderId);        
         $var = "error";
 
         if($command === 'updatesecret')
@@ -207,4 +220,5 @@ class GetSecretConfig extends AbstractCheckoutController
     }
 
 }
+
 

@@ -1,6 +1,7 @@
 <?php
 namespace Nexio\Payment\Webapi;
- 
+
+
 interface HelloInterface
 {
     /**

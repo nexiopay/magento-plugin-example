@@ -4,7 +4,7 @@
             <nexio>
                 <model>NexioFacade</model>
                 <title>Credit Card (Nexio)</title>
-                <payment_action>authorize_capture</payment_action>
+                <payment_action>authorize</payment_action>
                 <active>0</active>
                 <is_test>1</is_test>
                 <test_endpoint>https://api.nexiopaysandbox.com</test_endpoint>
@@ -20,7 +20,7 @@
                 <custom_css></custom_css>
                 <allowspecific>1</allowspecific>
                 <specificcountry>US</specificcountry>
-                <order_status>processing</order_status>
+                <order_status>pending_payment</order_status>
                 <merchant_id></merchant_id>
                 <customer_textfile></customer_textfile>
                 <fraud_check>0</fraud_check>
@@ -39,3 +39,4 @@
         </payment>
     </default>
 </config>
+

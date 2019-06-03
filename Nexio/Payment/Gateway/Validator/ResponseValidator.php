@@ -67,3 +67,4 @@ class ResponseValidator implements \Magento\Payment\Gateway\Validator\ValidatorI
         ]);
     }
 }
+

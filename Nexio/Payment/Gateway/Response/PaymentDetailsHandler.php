@@ -4,7 +4,7 @@ namespace Nexio\Payment\Gateway\Response;
 
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Gateway\Helper\SubjectReader;
-
+use Magento\Sales\Model\Order;
 /**
  * Class PaymentDetailsHandler
  * @package Nexio\Payment\Gateway\Response
@@ -17,12 +17,43 @@ class PaymentDetailsHandler extends AbstractHandler
      */
     public function handle(array $handlingSubject, array $response)
     {
+        $this->logger->addDebug("handler handle...");
+        
         $paymentDO = SubjectReader::readPayment($handlingSubject);
 
         $response = $this->readResponse($response);
 
         /** @var \Magento\Sales\Model\Order\Payment $payment */
         $payment = $paymentDO->getPayment();
+
+        //added by Sam Lu for change order status
+        //$paymentDO = $handlingSubject['payment'];
+        //$payment = $paymentDO->getPayment();
+        try
+        {
+            $order = $payment->getOrder();
+            $order->setState(Order::STATE_PENDING_PAYMENT);
+            $order->setStatus('pending_payment');
+            $order->save();
+
+            $orderid = $order->getId();
+            if(empty($orderid))
+            {
+                $this->logger->addDebug("cannot get order id");
+            }
+            else
+            {
+                $this->logger->addDebug("order id: ".$orderid);
+            }
+            $this->logger->addDebug("order status: ".$order->getStatus());
+        }
+        catch(Exception $e)
+        {
+            $this->logger->addDebug("Exception when handling order:".$e->getMessage());
+        }
+        
+        //
+
 
         $payment->setCcTransId(@$response['ref_number']);
         $payment->setLastTransId(@$response['ref_number']);
@@ -61,6 +92,7 @@ class PaymentDetailsHandler extends AbstractHandler
      */
     protected function readResponse(array $response)
     {
+        $this->logger->addDebug("handler readresponse...");
         $body = @$response['body'];
         if (!is_array($body)) {
             return [];
@@ -74,3 +106,4 @@ class PaymentDetailsHandler extends AbstractHandler
         ];
     }
 }
+

@@ -59,7 +59,7 @@ class GetOneTimeUseTokenDataBuilder extends AbstractDataBuilder
     const AUTH_ONLY = 'isAuthOnly';
     const WEBHOOK_URL = 'webhookUrl';
     const WEBHOOKFAIL_URL = 'webhookFailUrl';
-
+    const ORDER_NUMBER = "orderNumber";
 
     /**
      * @param array $buildSubject
@@ -95,10 +95,11 @@ class GetOneTimeUseTokenDataBuilder extends AbstractDataBuilder
                     "amex"
                 ],
                 self::CUSTOMER           => [
+                    self::ORDER_NUMBER        => @$billingAddress['ordernumber'],
                     self::FIRST_NAME          => @$billingAddress['firstname'],
                     self::LAST_NAME           => @$billingAddress['lastname'],
                     self::BILL_TO_ADDRESS_ONE => @$billingAddress['street1'],//[0],
-                    //self::BILL_TO_ADDRESS_TWO => @$billingAddress['street'][1],
+                    self::BILL_TO_ADDRESS_TWO => @$billingAddress['street2'],
                     self::BILL_TO_CITY        => @$billingAddress['city'],
                     self::BILL_TO_STATE       => @$billingAddress['regionCode'],
                     self::BILL_TO_POSTAL      => @$billingAddress['postcode'],
@@ -157,4 +158,5 @@ class GetOneTimeUseTokenDataBuilder extends AbstractDataBuilder
     }
 
 }
+
 

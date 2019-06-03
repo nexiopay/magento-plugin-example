@@ -65,7 +65,7 @@
                     </depends>
                 </field>
                 <field id="merchant_id" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1"
-                       showInStore="0">
+                       showInStore="0" canRestore="1">
                     <label>Merchant ID</label>
                 </field>
                 <field id="payment_action" translate="label" type="select" sortOrder="145" showInDefault="1"
@@ -118,7 +118,7 @@
                 </field>
                 <field id="verify_signature" translate="label" type="select" sortOrder="200" showInDefault="1" showInWebsite="1"
                        showInStore="0">
-                    <label>Auth Only</label>
+                    <label>Verify Signature</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="sort_order" translate="label" type="text" sortOrder="170" showInDefault="1" showInWebsite="1"
@@ -136,4 +136,5 @@
         </section>
     </system>
 </config>
+
 

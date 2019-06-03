@@ -63,7 +63,7 @@ class Hello implements HelloInterface
     private function callGetSecret()
     {
         try {
-            $requesturl = "https://".$_SERVER['HTTP_HOST']."/index.php/nexio/checkout/getsecretConfig/?command=getsecret";//"https://mag.cmsshanghaidev.com/index.php/nexio/checkout/getsecretConfig/";//$this->getUrl('webhook/v3/merchantWebhookSecret/'.'100039');
+            $requesturl = "https://".$_SERVER['HTTP_HOST']."/index.php/nexio/checkout/getsecretConfig/";//"https://mag.cmsshanghaidev.com/index.php/nexio/checkout/getsecretConfig/";//$this->getUrl('webhook/v3/merchantWebhookSecret/'.'100039');
             $this->logger->addDebug("HTTP requesturl is: ".$requesturl);
             $ch = curl_init($requesturl);
             
@@ -99,3 +99,4 @@ class Hello implements HelloInterface
 
 	
 }
+

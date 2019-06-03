@@ -27,10 +27,10 @@
     <virtualType name="NexioCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="authorize" xsi:type="string">NexioAuthorizeCommand</item>
+                <!--<item name="authorize" xsi:type="string">NexioAuthorizeCommand</item>
                 <item name="capture" xsi:type="string">NexioCaptureCommand</item>
                 <item name="refund" xsi:type="string">NexioRefundCommand</item>
-                <item name="vault_capture" xsi:type="string">NexioCaptureCommand</item>
+                <item name="vault_capture" xsi:type="string">NexioCaptureCommand</item>-->
                 <item name="get_one_time_use_token" xsi:type="string">NexioGetOneTimeUseTokenCommand</item>
                 <!--<item name="get_jwt" xsi:type="string">NexioGetJWTCommand</item>-->
             </argument>
@@ -215,4 +215,5 @@
     </virtualType>
     <!-- End Transfer Factory-->
 </config>
+
 
