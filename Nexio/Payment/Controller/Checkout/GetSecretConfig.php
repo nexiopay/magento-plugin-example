@@ -19,8 +19,60 @@ class GetSecretConfig extends AbstractCheckoutController
     public function execute()
     {
         $this->logger->addDebug('Get Secret config is called!!');	   
+        $orderId = 27;
+        $order = $orderId ? $this->orderFactory->create()->load($orderId) : false;
+        if(!$order)
+        {
+            $this->logger->addDebug('no order');	
+        }
+        $orderNum = $order->getIncrementId();
+        $this->logger->addDebug('OrderNum: '.$orderNum);
+        $order->setState('processing');
+        $order->setStatus('processing');
+        $payment = $order->getPayment();
+        $refnum = 'test_ref_000';
+        $payment->setCcTransId($refnum);
+        $payment->setLastTransId($refnum);
+        $payment->setTransactionId($refnum);
+        $payment->setShouldCloseParentTransaction(false);
+        $payment->setIsTransactionClosed(false);
+        try
+        {
+            $invoice = $order->prepareInvoice();
+            $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE);
+            $invoice->register();
+
+            if($payment->canCapture())
+            {
+                $this->logger->addDebug('payment can capture');
+                $payment->capture();
+            }
+            else
+            {
+                $this->logger->addDebug('payment can not capture!!');
+            }
+
+            if(is_null($this->transactionFactory) || empty($this->transactionFactory)) 
+            {
+                $this->logger->addDebug('transactionFactory is null');
+            }
+            else
+            {
+                $this->logger->addDebug('transactionFactory is not null!!'); 
+            }
+            $transaction = $this->transactionFactory->create();
+            $transaction->addObject($invoice);
+            $transaction->addObject($invoice->getOrder());
+    
+            $transaction->save();
+        }
+        catch(Exception $e)
+        {
+            $this->logger->addDebug('create and save invoice get exception: '.$e->getMessage());
+        }
         
-        
+
+
         $command = 'getsecret';
 
         if(!empty($_GET["command"]) && isset($_GET["command"]))
@@ -39,10 +91,9 @@ class GetSecretConfig extends AbstractCheckoutController
             $this->logger->addDebug('checkout session is not null!!'); 
         }
 
-	$order = $this->checkoutSession->getLastRealOrder();
-
-        $orderId=$order->getEntityId();
-	$this->logger->addDebug('order id is :'.$orderId);        
+        //$order = $this->checkoutSession->getLastRealOrder();
+        //$orderId=$order->getEntityId();
+        
         $var = "error";
 
         if($command === 'updatesecret')

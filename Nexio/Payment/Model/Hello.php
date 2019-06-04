@@ -48,6 +48,31 @@ class Hello implements HelloInterface
         $post = file_get_contents('php://input');
         $this->logger->addDebug('body of callbackdata: '.$post);
 
+        $param = json_decode($post,true);
+
+        try
+        {
+            $orderId = $param['data']['data']['customer']['orderNumber'];
+            $this->logger->addDebug('OrderId: '.$param['data']['data']['customer']['orderNumber']);
+            $order = Mage::getModel('sales/order')->load($orderId);
+		if(is_null($order) || empty($order)){
+			$this->logger->addDebug('order is null ');
+		}
+	    $orderNum = $order->getIncrementId();
+
+	     if(is_null($orderNum) || empty($orderNum)){
+                        $this->logger->addDebug('orderNum is null ');
+	     }
+	     else
+	     {
+		     $this->logger->addDebug('OrderNum: '.$orderNum);
+	     }
+        }
+        catch(Exception $e)
+        {
+            $this->logger->addDebug('order info exception: '.$e->getMessage());
+        }
+
     }
 
     public function loadsecret()
@@ -63,7 +88,7 @@ class Hello implements HelloInterface
     private function callGetSecret()
     {
         try {
-            $requesturl = "https://".$_SERVER['HTTP_HOST']."/index.php/nexio/checkout/getsecretConfig/";//"https://mag.cmsshanghaidev.com/index.php/nexio/checkout/getsecretConfig/";//$this->getUrl('webhook/v3/merchantWebhookSecret/'.'100039');
+            $requesturl = "https://".$_SERVER['HTTP_HOST']."/index.php/nexio/checkout/getsecretConfig/?command=getsecret";//"https://mag.cmsshanghaidev.com/index.php/nexio/checkout/getsecretConfig/";//$this->getUrl('webhook/v3/merchantWebhookSecret/'.'100039');
             $this->logger->addDebug("HTTP requesturl is: ".$requesturl);
             $ch = curl_init($requesturl);
             

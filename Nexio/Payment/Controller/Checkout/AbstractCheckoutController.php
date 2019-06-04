@@ -48,6 +48,12 @@ abstract class AbstractCheckoutController extends Action
     protected $checkoutsession;
 
     /**
+     * @var \Magento\Sales\Model\OrderFactory
+     */
+    protected $orderFactory;
+
+    protected $transactionFactory;
+    /**
      * AbstractCheckoutController constructor.
      * @param Context $context
      * @param ConfigInterface $config
@@ -64,7 +70,9 @@ abstract class AbstractCheckoutController extends Action
         \Nexio\Payment\Logger\Logger $logger,
         \Magento\Framework\Registry $registry,
         \Magento\Framework\Encryption\EncryptorInterface $encryptor,
-        \Magento\Checkout\Model\Session $checkoutSession
+        \Magento\Checkout\Model\Session $checkoutSession,
+        \Magento\Sales\Model\OrderFactory $orderFactory,
+        \Magento\Framework\DB\TransactionFactory $transactionFactory
     ) {
         $this->customerSession = $customerSession;
         $this->commandPool = $commandPool;
@@ -73,6 +81,8 @@ abstract class AbstractCheckoutController extends Action
         $this->config = $config;
         $this->encryptor = $encryptor;
         $this->checkoutSession = $checkoutSession;
+        $this->orderFactory = $orderFactory;
+        $this->transactionFactory = $transactionFactory;
         parent::__construct($context);
     }
 }

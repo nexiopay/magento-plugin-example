@@ -19,15 +19,22 @@ class IframeConfig extends AbstractCheckoutController
     {
         $this->logger->addDebug('iFrameController is called');	   
         $controllerResult = $this->resultFactory->create(ResultFactory::TYPE_JSON);
-	$postParams = rawurldecode(file_get_contents('php://input'));//$this->getRequest()->getPostValue();
-	$jsonparm = json_decode($postParams,true);
-	$this->logger->addDebug('body: '.$postParams);
+        $postParams = rawurldecode(file_get_contents('php://input'));//$this->getRequest()->getPostValue();
+        $jsonparm = json_decode($postParams,true);
+        $this->logger->addDebug('body: '.$postParams);
 
         try {
 		if(!is_null($jsonparm) && !empty($jsonparm['billingAddress']) && !empty($jsonparm['totals']))
 		{
-			$this->commandPool->get(TransferFactory::GET_ONE_TIME_USE_TOKEN)->execute($jsonparm);
-               		 $result = $this->registry->registry(TransactionGetOTUT::NEXIO_ONE_TIME_USE_TOKEN_KEY);
+            $order = $this->checkoutSession->getLastRealOrder();
+            $orderId=$order->getEntityId();
+            $this->logger->addDebug('order id is: '.$orderId);
+	    $this->logger->addDebug('original order number is: '.$jsonparm['billingAddress']['ordernumber']);
+
+	    $jsonparm['billingAddress']['ordernumber'] = $orderId;
+            
+            $this->commandPool->get(TransferFactory::GET_ONE_TIME_USE_TOKEN)->execute($jsonparm);
+            $result = $this->registry->registry(TransactionGetOTUT::NEXIO_ONE_TIME_USE_TOKEN_KEY);
 
 		}
 		else
@@ -52,3 +59,4 @@ class IframeConfig extends AbstractCheckoutController
         return $controllerResult->setData($result);
     }
 }
+
