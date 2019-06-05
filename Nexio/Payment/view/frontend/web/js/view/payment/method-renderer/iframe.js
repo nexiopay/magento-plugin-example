@@ -258,15 +258,10 @@ define(
                             // fullScreenLoader.startLoader();
                             self.closeModal();
                             self.iframeLoaded = false;
-                            
-                            
-			                //todo need add notes like payment status, batch no etc 
-                        //} else {
-                         //   self.alertError(
-                         //       $t('Something went wrong. Please try again later.'),
-                         //       url.build('checkout/cart/')
-                          //  );
-                        //}
+                            //todo redirect to success page
+                            if (self.redirectAfterPlaceOrder) {
+                                redirectOnSuccessAction.execute();
+                            }
                     } else if (data.event === 'loaded') {
                         self.iframeLoaded = true;
                         fullScreenLoader.stopLoader();

@@ -19,7 +19,107 @@ class GetSecretConfig extends AbstractCheckoutController
     public function execute()
     {
         $this->logger->addDebug('Get Secret config is called!!');	   
-        $orderId = 27;
+        
+        $command = 'getsecret';
+        
+        if(!empty($_GET["command"]) && isset($_GET["command"]))
+        {
+            //there is command, use the passed value
+            $command = $_GET["command"];
+            $this->logger->addDebug('parameter: '. $_GET["command"]);
+        }
+        
+        
+        if($command === 'getsecret')
+        {
+            $this->logger->addDebug('receive get secret command');
+            $return = $this->loadSecret();
+            echo json_encode($return);
+        }
+        else if($command === 'updateorder')
+        {
+            $this->logger->addDebug('receive update order command');
+            $this->logger->addDebug("eventType: ".$_GET["eventType"]);
+            $this->logger->addDebug("authCode: ".$_GET["authCode"]);
+            $this->logger->addDebug("amount: ".$_GET["amount"]);
+            $this->logger->addDebug("orderId: ".$_GET["orderId"]);
+            $this->updateOrder($_GET["orderId"],$_GET["amount"],$_GET["authCode"],$_GET["eventType"]);
+        }
+        else if($command == 'updateorderwitherr')
+        {
+            $this->logger->addDebug('receive update order with error command');
+            $this->logger->addDebug("orderId: ".$_GET["orderId"]);
+            $this->logger->addDebug("msg: ".$_GET["msg"]);
+
+            $this->updateOderWithErrorMsg($_GET["orderId"],$_GET["msg"]);
+        }
+        
+
+        
+    }
+
+    private function loadSecret()
+    {
+        $command = 'getsecret';
+
+        $response = array(
+            'verifyflag' =>true,
+            'secret' => 'error'
+        );
+
+        if($this->getverifysignature())
+        {
+            //need do signature verification 
+            $var = "error";
+            $var = $this->get_secret();
+            
+            if($command === 'updatesecret')
+            {
+                $var = $this->update_secret();
+            }
+            else
+            {
+                $var = $this->get_secret();
+                if($var === 'error')
+                {
+                    //do update secret 
+                    $var = $this->update_secret();
+                } 
+            }
+            
+            $response = array(
+                'verifyflag' =>true,
+                'secret' => $var
+            );
+            
+            
+        }
+        else
+        {
+            $response = array(
+                'verifyflag' =>false,
+                'secret' => 'error'
+            );
+        }
+          
+        return $response;   
+    }
+
+    private function updateOderWithErrorMsg($orderId,$msg)
+    {
+        $order = $orderId ? $this->orderFactory->create()->load($orderId) : false;
+        if(!$order)
+        {
+            $this->logger->addDebug('updateOrderWithErrorMsg cannot load order');	
+        }
+
+        $order->addStatusHistoryComment($msg);
+        $order->save();
+    }
+
+    private function updateOrder($orderId,$amount,$authCode,$eventType)
+    {
+        //$orderId = 26;
         $order = $orderId ? $this->orderFactory->create()->load($orderId) : false;
         if(!$order)
         {
@@ -29,13 +129,17 @@ class GetSecretConfig extends AbstractCheckoutController
         $this->logger->addDebug('OrderNum: '.$orderNum);
         $order->setState('processing');
         $order->setStatus('processing');
+        $order->addStatusHistoryComment('Webhook function signature verification passed');
+        $order->addStatusHistoryComment('Nexio AuthCode is: '.$authCode);
         $payment = $order->getPayment();
-        $refnum = 'test_ref_000';
-        $payment->setCcTransId($refnum);
-        $payment->setLastTransId($refnum);
-        $payment->setTransactionId($refnum);
+        
+        //$payment->setCcTransId($refnum);
+        //$payment->setLastTransId($refnum);
+        //$payment->setTransactionId($refnum);
         $payment->setShouldCloseParentTransaction(false);
         $payment->setIsTransactionClosed(false);
+
+        //todo need judege type is capture or only auth if only auth, do not generate invoice !!!!
         try
         {
             $invoice = $order->prepareInvoice();
@@ -70,45 +174,6 @@ class GetSecretConfig extends AbstractCheckoutController
         {
             $this->logger->addDebug('create and save invoice get exception: '.$e->getMessage());
         }
-        
-
-
-        $command = 'getsecret';
-
-        if(!empty($_GET["command"]) && isset($_GET["command"]))
-        {
-            //there is command, use the passed value
-            $command = $_GET["command"];
-            $this->logger->addDebug('parameter: '. $_GET["command"]);
-        }
-
-        if(is_null($this->checkoutSession))
-        {
-            $this->logger->addDebug('checkout session is null');
-        }
-        else
-        {
-            $this->logger->addDebug('checkout session is not null!!'); 
-        }
-
-        //$order = $this->checkoutSession->getLastRealOrder();
-        //$orderId=$order->getEntityId();
-        
-        $var = "error";
-
-        if($command === 'updatesecret')
-        {
-            $var = $this->update_secret();
-        }
-        else
-        {
-            $var = $this->get_secret();
-        }
-
-        $response = array(
-            "secret" => $var
-        );
-        echo json_encode($response);   
     }
 
     /**
@@ -149,7 +214,7 @@ class GetSecretConfig extends AbstractCheckoutController
                 }
 				
 				$secret = json_decode($result)->secret;
-				error_log('get secret: '.$secret);
+				$this->logger->addDebug('get secret: '.$secret);
 				return $secret;
 			}
 		} catch (Exception $e) {
@@ -251,6 +316,15 @@ class GetSecretConfig extends AbstractCheckoutController
     private function getIsTest()
     {
         return !!$this->config->getValue('is_test');
+    }
+
+
+    /**
+     * @return bool
+     */
+    private function getverifysignature()
+    {
+        return !!$this->config->getValue('verify_signature');
     }
 
     /**
