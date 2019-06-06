@@ -33,7 +33,16 @@ class GetSecretConfig extends AbstractCheckoutController
         if($command === 'getsecret')
         {
             $this->logger->addDebug('receive get secret command');
-            $return = $this->loadSecret();
+            $merchantId = $this->getMerchantId();
+            if(!empty($_GET["merchantId"]))
+            {
+                $merchantId = $_GET["merchantId"];
+                $this->logger->addDebug("merchantId from webhook is: ".$merchantId);
+            } 
+
+            $this->logger->addDebug("merchantId: ".$merchantId);
+            
+            $return = $this->loadSecret($merchantId);
             echo json_encode($return);
         }
         else if($command === 'updateorder')
@@ -43,22 +52,24 @@ class GetSecretConfig extends AbstractCheckoutController
             $this->logger->addDebug("authCode: ".$_GET["authCode"]);
             $this->logger->addDebug("amount: ".$_GET["amount"]);
             $this->logger->addDebug("orderId: ".$_GET["orderId"]);
-            $this->updateOrder($_GET["orderId"],$_GET["amount"],$_GET["authCode"],$_GET["eventType"]);
+            $this->logger->addDebug("verifybypass: ".$_GET["verifybypass"]);
+            $this->updateOrder($_GET["orderId"],$_GET["amount"],$_GET["authCode"],$_GET["eventType"],$_GET["verifybypass"]);
         }
         else if($command == 'updateorderwitherr')
         {
             $this->logger->addDebug('receive update order with error command');
             $this->logger->addDebug("orderId: ".$_GET["orderId"]);
             $this->logger->addDebug("msg: ".$_GET["msg"]);
-
-            $this->updateOderWithErrorMsg($_GET["orderId"],$_GET["msg"]);
+            $msg = $_GET["msg"];
+            $msg = str_replace("|"," ",$msg);
+            $this->updateOderWithErrorMsg($_GET["orderId"],$msg);
         }
         
 
         
     }
 
-    private function loadSecret()
+    private function loadSecret($merchantId)
     {
         $command = 'getsecret';
 
@@ -67,23 +78,23 @@ class GetSecretConfig extends AbstractCheckoutController
             'secret' => 'error'
         );
 
-        if($this->getverifysignature())
+        if($this->getverifysignature($merchantId))
         {
             //need do signature verification 
             $var = "error";
-            $var = $this->get_secret();
+            $var = $this->get_secret($merchantId);
             
             if($command === 'updatesecret')
             {
-                $var = $this->update_secret();
+                $var = $this->update_secret($merchantId);
             }
             else
             {
-                $var = $this->get_secret();
+                $var = $this->get_secret($merchantId);
                 if($var === 'error')
                 {
                     //do update secret 
-                    $var = $this->update_secret();
+                    $var = $this->update_secret($merchantId);
                 } 
             }
             
@@ -117,7 +128,7 @@ class GetSecretConfig extends AbstractCheckoutController
         $order->save();
     }
 
-    private function updateOrder($orderId,$amount,$authCode,$eventType)
+    private function updateOrder($orderId,$amount,$authCode,$eventType,$verifybypass)
     {
         //$orderId = 26;
         $order = $orderId ? $this->orderFactory->create()->load($orderId) : false;
@@ -129,46 +140,41 @@ class GetSecretConfig extends AbstractCheckoutController
         $this->logger->addDebug('OrderNum: '.$orderNum);
         $order->setState('processing');
         $order->setStatus('processing');
-        $order->addStatusHistoryComment('Webhook function signature verification passed');
+        if($verifybypass)
+            $order->addStatusHistoryComment('Webhook function signature verification is bypassed!');
+        else
+            $order->addStatusHistoryComment('Webhook function signature verification passed!');
         $order->addStatusHistoryComment('Nexio AuthCode is: '.$authCode);
         $payment = $order->getPayment();
         
-        //$payment->setCcTransId($refnum);
-        //$payment->setLastTransId($refnum);
-        //$payment->setTransactionId($refnum);
         $payment->setShouldCloseParentTransaction(false);
         $payment->setIsTransactionClosed(false);
 
         //todo need judege type is capture or only auth if only auth, do not generate invoice !!!!
         try
         {
-            $invoice = $order->prepareInvoice();
-            $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE);
-            $invoice->register();
-
-            if($payment->canCapture())
+            if($eventType === "TRANSACTION_CAPTURED")
             {
-                $this->logger->addDebug('payment can capture');
-                $payment->capture();
-            }
-            else
-            {
-                $this->logger->addDebug('payment can not capture!!');
-            }
-
-            if(is_null($this->transactionFactory) || empty($this->transactionFactory)) 
-            {
-                $this->logger->addDebug('transactionFactory is null');
-            }
-            else
-            {
-                $this->logger->addDebug('transactionFactory is not null!!'); 
-            }
-            $transaction = $this->transactionFactory->create();
-            $transaction->addObject($invoice);
-            $transaction->addObject($invoice->getOrder());
+                $invoice = $order->prepareInvoice();
+            
+                $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE);
+                $invoice->register();
+                
+                $transaction = $this->transactionFactory->create();
+                //this line makes invoice with correct amount
+                $transaction->addObject($invoice);
     
-            $transaction->save();
+                
+                $order->save();
+                $invoice->save();
+                $transaction->save();
+            }
+            else
+            {
+                $this->logger->addDebug('Transaction is not cpatured, only save order info');
+                $order->save();
+            }
+            
         }
         catch(Exception $e)
         {
@@ -184,12 +190,12 @@ class GetSecretConfig extends AbstractCheckoutController
 	 * 
 	 */
     
-	private function get_secret()
+	private function get_secret($merchantId)
 	{
 		try {
 			$basicauth = $this->getAuthorization();
             $this->logger->addDebug("basicauth is: ".$basicauth);
-            $requesturl = $this->getUrl("/webhook/v3/secret/").$this->getMerchantId();
+            $requesturl = $this->getUrl("/webhook/v3/secret/").$merchantId;
             $this->logger->addDebug("requesturl is: ".$requesturl);
 			$ch = curl_init($requesturl);
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
@@ -232,12 +238,12 @@ class GetSecretConfig extends AbstractCheckoutController
 	 * 
 	 */
     
-	private function update_secret()
+	private function update_secret($merchantId)
 	{
 		try {
             $basicauth = $this->getAuthorization();
             $request = array(
-                'merchantId' => $this->getMerchantId()
+                'merchantId' => $merchantId
             );
             $data = json_encode($request);
             $this->logger->addDebug("update secret basicauth is: ".$basicauth);

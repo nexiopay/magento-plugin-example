@@ -20,7 +20,7 @@
                 <custom_css></custom_css>
                 <allowspecific>1</allowspecific>
                 <specificcountry>US</specificcountry>
-                <order_status>pending_payment</order_status>
+                <order_status>processing</order_status>
                 <merchant_id></merchant_id>
                 <customer_textfile></customer_textfile>
                 <fraud_check>0</fraud_check>

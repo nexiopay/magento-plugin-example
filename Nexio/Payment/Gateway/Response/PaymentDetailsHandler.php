@@ -18,42 +18,29 @@ class PaymentDetailsHandler extends AbstractHandler
     public function handle(array $handlingSubject, array $response)
     {
         $this->logger->addDebug("handler handle...");
+        $paymentDO = SubjectReader::readPayment($handlingSubject);
+
+        // @var \Magento\Sales\Model\Order\Payment $payment 
+        $payment = $paymentDO->getPayment();
+
+        if($payment->canCapture())
+        {
+            $this->logger->addDebug('capture process payment can capture');
+            
+        }
+        else
+        {
+            $this->logger->addDebug('capture process payment can not capture!!');
+        }
+
+        /*$this->logger->addDebug('response: '.json_encode($response));
         
         $paymentDO = SubjectReader::readPayment($handlingSubject);
 
         $response = $this->readResponse($response);
 
-        /** @var \Magento\Sales\Model\Order\Payment $payment */
+        // @var \Magento\Sales\Model\Order\Payment $payment 
         $payment = $paymentDO->getPayment();
-
-        //added by Sam Lu for change order status
-        //$paymentDO = $handlingSubject['payment'];
-        //$payment = $paymentDO->getPayment();
-        try
-        {
-            $order = $payment->getOrder();
-            $order->setState(Order::STATE_PENDING_PAYMENT);
-            $order->setStatus('pending_payment');
-            $order->save();
-
-            $orderid = $order->getId();
-            if(empty($orderid))
-            {
-                $this->logger->addDebug("cannot get order id");
-            }
-            else
-            {
-                $this->logger->addDebug("order id: ".$orderid);
-            }
-            $this->logger->addDebug("order status: ".$order->getStatus());
-        }
-        catch(Exception $e)
-        {
-            $this->logger->addDebug("Exception when handling order:".$e->getMessage());
-        }
-        
-        //
-
 
         $payment->setCcTransId(@$response['ref_number']);
         $payment->setLastTransId(@$response['ref_number']);
@@ -83,7 +70,7 @@ class PaymentDetailsHandler extends AbstractHandler
             $payment->setAdditionalInformation('payment_id', @$response['payment_id']);
         } catch (LocalizedException $e) {
             $this->logger->addDebug("Exception when handling payment details");
-        }
+        }*/
     }
 
     /**
