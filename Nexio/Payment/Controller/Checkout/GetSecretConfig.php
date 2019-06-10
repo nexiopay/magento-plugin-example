@@ -138,8 +138,7 @@ class GetSecretConfig extends AbstractCheckoutController
         }
         $orderNum = $order->getIncrementId();
         $this->logger->addDebug('OrderNum: '.$orderNum);
-        $order->setState('processing');
-        $order->setStatus('processing');
+        
         if($verifybypass)
             $order->addStatusHistoryComment('Webhook function signature verification is bypassed!');
         else
@@ -164,7 +163,10 @@ class GetSecretConfig extends AbstractCheckoutController
                 //this line makes invoice with correct amount
                 $transaction->addObject($invoice);
     
-                
+                //$order->setState('processing');
+                //only update order status
+                $order->setStatus('processing');
+
                 $order->save();
                 $invoice->save();
                 $transaction->save();
@@ -172,6 +174,7 @@ class GetSecretConfig extends AbstractCheckoutController
             else
             {
                 $this->logger->addDebug('Transaction is not cpatured, only save order info');
+                //$order->setStatus('nexio_auth');
                 $order->save();
             }
             

@@ -29,13 +29,15 @@ class IframeConfig extends AbstractCheckoutController
             $order = $this->checkoutSession->getLastRealOrder();
             $orderId=$order->getEntityId();
             $this->logger->addDebug('order id is: '.$orderId);
-	    $this->logger->addDebug('original order number is: '.$jsonparm['billingAddress']['ordernumber']);
-
-	    $jsonparm['billingAddress']['ordernumber'] = $orderId;
+            $this->logger->addDebug('original order number is: '.$jsonparm['billingAddress']['ordernumber']);
             
+            $order->setStatus('pending');
+            $order->save();
+
+            $jsonparm['billingAddress']['ordernumber'] = $orderId;
             $this->commandPool->get(TransferFactory::GET_ONE_TIME_USE_TOKEN)->execute($jsonparm);
             $result = $this->registry->registry(TransactionGetOTUT::NEXIO_ONE_TIME_USE_TOKEN_KEY);
-
+            
 		}
 		else
 		{
