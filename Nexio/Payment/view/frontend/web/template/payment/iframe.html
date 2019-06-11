@@ -102,7 +102,7 @@
                 <button class="action primary checkout"
                         type="submit"
                         data-bind="
-                        click: beforePlaceOrder,
+                        click: redisplayiframe,
                         attr: {title: $t('Continue')},
                         css: {disabled: !isPlaceOrderActionAllowed()},
                         enable: (getCode() == isChecked())

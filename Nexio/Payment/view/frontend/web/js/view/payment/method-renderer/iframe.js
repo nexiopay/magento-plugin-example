@@ -114,6 +114,20 @@ define(
                     self.openModal();
                 }
             },
+            redisplayiframe: function()
+            {
+                var self = this;
+                if (self.iframeUrl) {
+                    console.log("iframeUrl is not null, redisplay it");
+                    var iframe = window.document.getElementById('nexio-iframe');
+                    iframe.src = self.iframeUrl;
+                    window.addEventListener('message', self.messageListener.bind(self));
+                    self.openModal();
+                } else {
+                   console.log("first time submit, call beforePlaceOrder first.");
+                   self.beforePlaceOrder();
+                }
+            },
             beforePlaceOrder: function () {
                 var self = this;
                 self.placeOrder();
