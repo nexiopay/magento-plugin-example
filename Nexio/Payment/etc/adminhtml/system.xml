@@ -65,23 +65,8 @@
                     </depends>
                 </field>
                 <field id="merchant_id" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1"
-                       showInStore="0" canRestore="1">
+                       showInStore="0">
                     <label>Merchant ID</label>
-                </field>
-                <field id="payment_action" translate="label" type="select" sortOrder="145" showInDefault="1"
-                       showInWebsite="1" showInStore="0" canRestore="1">
-                    <label>Payment Action</label>
-                    <source_model>Nexio\Payment\Model\Adminhtml\Source\PaymentAction</source_model>
-                </field>
-                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="150" showInDefault="1"
-                       showInWebsite="1" showInStore="0" canRestore="1">
-                    <label>Payment from Applicable Countries</label>
-                    <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
-                </field>
-                <field id="specificcountry" translate="label" type="multiselect" sortOrder="160" showInDefault="1"
-                       showInWebsite="1" showInStore="0" canRestore="1">
-                    <label>Payment from Specific Countries</label>
-                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
                 </field>
                 <field id="custom_css" translate="label" type="text" sortOrder="165" showInDefault="1" showInWebsite="1"
                        showInStore="0">
@@ -120,17 +105,6 @@
                        showInStore="0">
                     <label>Verify Signature</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-                <field id="sort_order" translate="label" type="text" sortOrder="170" showInDefault="1" showInWebsite="1"
-                       showInStore="0">
-                    <label>Sort Order</label>
-                    <frontend_class>validate-number</frontend_class>
-                </field>
-                <field id="nexio_vault_active" translate="label" type="select" sortOrder="125" showInDefault="1" showInWebsite="1"
-                       showInStore="0" canRestore="1">
-                    <label>Allow Save Card</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <config_path>payment/nexio_vault/active</config_path>
                 </field>
             </group>
         </section>
