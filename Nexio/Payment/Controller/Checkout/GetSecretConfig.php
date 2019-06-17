@@ -27,6 +27,7 @@ class GetSecretConfig extends AbstractCheckoutController
             //there is command, use the passed value
             $command = $_GET["command"];
             $this->logger->addDebug('parameter: '. $_GET["command"]);
+            fwrite(STDERR, print_r('get command: '.$_GET["command"], TRUE));
         }
         
         
@@ -78,7 +79,7 @@ class GetSecretConfig extends AbstractCheckoutController
             'secret' => 'error'
         );
 
-        if($this->getverifysignature($merchantId))
+        if($this->getverifysignature())
         {
             //need do signature verification 
             $var = "error";
@@ -174,7 +175,7 @@ class GetSecretConfig extends AbstractCheckoutController
             else
             {
                 $this->logger->addDebug('Transaction is not cpatured, only save order info');
-                //$order->setStatus('nexio_auth');
+                $order->setStatus('nexio_auth');
                 $order->save();
             }
             

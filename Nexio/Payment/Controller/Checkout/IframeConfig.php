@@ -22,37 +22,32 @@ class IframeConfig extends AbstractCheckoutController
         $postParams = rawurldecode(file_get_contents('php://input'));//$this->getRequest()->getPostValue();
         $jsonparm = json_decode($postParams,true);
         $this->logger->addDebug('body: '.$postParams);
+        return $this->process($jsonparm,$controllerResult);
+    }
 
+    public function process($jsonparm,$controllerResult)
+    {
         try {
-		if(!is_null($jsonparm) && !empty($jsonparm['billingAddress']) && !empty($jsonparm['totals']))
-		{
-            $order = $this->checkoutSession->getLastRealOrder();
-            $orderId=$order->getEntityId();
-            $this->logger->addDebug('order id is: '.$orderId);
-            $this->logger->addDebug('original order number is: '.$jsonparm['billingAddress']['ordernumber']);
-            
-            $order->setStatus('pending');
-            $order->save();
+            if(!is_null($jsonparm) && !empty($jsonparm['billingAddress']) && !empty($jsonparm['totals']))
+            {
+                $order = $this->checkoutSession->getLastRealOrder();
+                $orderId=$order->getEntityId();
+                $this->logger->addDebug('order id is: '.$orderId);
+                $this->logger->addDebug('original order number is: '.$jsonparm['billingAddress']['ordernumber']);
+                
+                $order->setStatus('pending');
+                $order->save();
 
-            $jsonparm['billingAddress']['ordernumber'] = $orderId;
-            $this->commandPool->get(TransferFactory::GET_ONE_TIME_USE_TOKEN)->execute($jsonparm);
-            $result = $this->registry->registry(TransactionGetOTUT::NEXIO_ONE_TIME_USE_TOKEN_KEY);
-            
-		}
-		else
-		{
-			$result = false;
-		}
-		/*
-		if (@$postParams['billingAddress'] &&
-                json_decode(@$postParams['billingAddress'], true) &&
-                is_array(json_decode(@$postParams['billingAddress'], true))) {
-                $postParams['billingAddress'] = json_decode(@$postParams['billingAddress'], true);
-                $this->commandPool->get(TransferFactory::GET_ONE_TIME_USE_TOKEN)->execute($postParams);
+                $jsonparm['billingAddress']['ordernumber'] = $orderId;
+                $this->commandPool->get(TransferFactory::GET_ONE_TIME_USE_TOKEN)->execute($jsonparm);
                 $result = $this->registry->registry(TransactionGetOTUT::NEXIO_ONE_TIME_USE_TOKEN_KEY);
-            } else {
+                
+            }
+            else
+            {
                 $result = false;
-	    }*/
+            }
+		
         } catch (\Exception $e) {
             $result = false;
             $this->logger->addDebug("Exception when getting token: " . $e->getMessage());
@@ -60,5 +55,6 @@ class IframeConfig extends AbstractCheckoutController
         }
         return $controllerResult->setData($result);
     }
+
 }
 

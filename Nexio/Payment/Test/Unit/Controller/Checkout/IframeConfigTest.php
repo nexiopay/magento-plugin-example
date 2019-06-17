@@ -30,8 +30,10 @@ use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Checkout\Model\Session;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Framework\DB\TransactionFactory;
+use Magento\Sales\Model\Order;
 
 use Nexio\Payment\Controller\Checkout\IframeConfig;
+use Nexio\Payment\Logger\Logger;
 
 class IframeConfigTest extends \PHPUnit\Framework\TestCase
 {
@@ -122,10 +124,12 @@ class IframeConfigTest extends \PHPUnit\Framework\TestCase
 
         $this->commandPoolMock = $this->getMockBuilder(CommandPoolInterface::class)
             ->disableOriginalConstructor()
+            ->setMethods(['get'])
             ->getMock();
 
         $this->registryMock = $this->getMockBuilder(Registry::class)
             ->disableOriginalConstructor()
+            ->setMethods(['registry'])
             ->getMock();
 
         $this->encryptorMock = $this->getMockBuilder(EncryptorInterface::class)
@@ -136,6 +140,8 @@ class IframeConfigTest extends \PHPUnit\Framework\TestCase
             ->disableOriginalConstructor()
             ->getMock();
         
+        
+
         $this->orderFactoryMock = $this->getMockBuilder(OrderFactory::class)
             ->disableOriginalConstructor()
             ->getMock();
@@ -163,24 +169,57 @@ class IframeConfigTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function testExecute()
+    public function testProcess_success()
     {
         //IframeConfig needs
         $result = 'TOKENFEOMNEXIO';
         
+        //need mock order
+        $orderMock = $this->getMockBuilder(Order::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $orderMock->expects(self::once())
+            ->method('getEntityId')
+            ->willReturn(12);    
+
+        //need 
+        $this->checkoutSessionMock->expects(self::once())
+            ->method('getLastRealOrder')
+            ->willReturn($orderMock);    
+
         $resultMock = $this->getResultMock();
         $resultMock->expects(self::once())
             ->method('setData')
             ->with($result)
             ->willReturn($result);
 
-        $this->resultFactoryMock->expects(self::once())
-            ->method('create')
+        $this->resultFactoryMock->method('create')
             ->with(ResultFactory::TYPE_JSON)
             ->willReturn($resultMock);
 
+        $commandMock = $this->getMockBuilder(GatewayCommand::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['execute'])
+            ->getMock();
+
+        $commandMock->expects(static::once())
+            ->method('execute')
+            ->willReturn([]);
+
+        $this->commandPoolMock->expects(static::once())
+            ->method('get')
+            ->with(TransferFactory::GET_ONE_TIME_USE_TOKEN)
+            ->willReturn($commandMock);
+
+        $this->registryMock->expects(static::once())
+            ->method('registry')
+            ->with(TransactionGetOTUT::NEXIO_ONE_TIME_USE_TOKEN_KEY)
+            ->willReturn($result);
+
+
         $request = array(
-            'billingaddress' => array(
+            'billingAddress' => array(
                                         'ordernumber' => 123
             ),
             'totals' => array(
@@ -190,15 +229,56 @@ class IframeConfigTest extends \PHPUnit\Framework\TestCase
 
         $data = json_encode($request);
 
-        stream_wrapper_unregister("php");
-        $streammock = new MockPhpStream();
-        stream_wrapper_register("php", $streammock);
-        file_put_contents('php://input', $data);
-           
-              
 
-        self::assertEquals($this->IframeConfig->execute(), $result);
-        stream_wrapper_restore("php");  
+        self::assertEquals($this->IframeConfig->process($request,$resultMock), $result);  
+    }
+
+    public function testProcess_fail()
+    {
+        
+        $result = false;
+        
+
+        $resultMock = $this->getResultMock();
+        $resultMock->method('setData')
+            ->with($result)
+            ->willReturn($result);
+
+        $this->resultFactoryMock->method('create')
+            ->with(ResultFactory::TYPE_JSON)
+            ->willReturn($resultMock);
+
+
+        $request = array(
+            'billingAddress' => array(
+                                        'ordernumber' => 123
+            ),
+            //'totals' => array(
+            //    'amount' => 5.99
+            //)
+        );
+
+        $data = json_encode($request);
+
+
+        self::assertEquals($this->IframeConfig->process($request,$resultMock), $result);  
+
+
+        $request = array(
+            //'billingAddress' => array(
+            //                            'ordernumber' => 123
+            //),
+            'totals' => array(
+                'amount' => 5.99
+            )
+        );
+
+        $data = json_encode($request);
+
+
+        self::assertEquals($this->IframeConfig->process($request,$resultMock), $result);  
+
+        self::assertEquals($this->IframeConfig->process(null,$resultMock), $result); 
     }
 
     /**
@@ -213,69 +293,5 @@ class IframeConfigTest extends \PHPUnit\Framework\TestCase
 
 }
 
-
-class MockPhpStream{
-    protected $index = 0;
-    protected $length = null;
-    protected $data = 'hello world';
-
-    public $context;
-
-    function __construct(){
-        if(file_exists($this->buffer_filename())){
-        $this->data = file_get_contents($this->buffer_filename());
-        }else{
-        $this->data = '';
-        }
-        $this->index = 0;
-        $this->length = strlen($this->data);
-    }
-
-    protected function buffer_filename(){
-    return sys_get_temp_dir().'\php_input.txt';
-    }
-
-    function stream_open($path, $mode, $options, &$opened_path){
-    return true;
-    }
-
-    function stream_close(){
-    }
-
-    function stream_stat(){
-    return array();
-    }
-
-    function stream_flush(){
-    return true;
-    }
-
-    function stream_read($count){
-    if(is_null($this->length) === TRUE){
-    $this->length = strlen($this->data);
-    }
-    $length = min($count, $this->length - $this->index);
-    $data = substr($this->data, $this->index);
-    $this->index = $this->index + $length;
-    return $data;
-    }
-
-    function stream_eof(){
-    return ($this->index >= $this->length ? TRUE : FALSE);
-    }
-
-    function stream_write($data){
-    return file_put_contents($this->buffer_filename(), $data);
-    }
-
-    function unlink(){
-    if(file_exists($this->buffer_filename())){
-    unlink($this->buffer_filename());
-    }
-    $this->data = '';
-    $this->index = 0;
-    $this->length = 0;
-    }
-}
 
 
