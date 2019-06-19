@@ -27,7 +27,7 @@ class GetSecretConfig extends AbstractCheckoutController
             //there is command, use the passed value
             $command = $_GET["command"];
             $this->logger->addDebug('parameter: '. $_GET["command"]);
-            fwrite(STDERR, print_r('get command: '.$_GET["command"], TRUE));
+            //fwrite(STDERR, print_r('get command: '.$_GET["command"], TRUE));
         }
         
         
@@ -42,7 +42,7 @@ class GetSecretConfig extends AbstractCheckoutController
             } 
 
             $this->logger->addDebug("merchantId: ".$merchantId);
-            
+           
             $return = $this->loadSecret($merchantId);
             echo json_encode($return);
         }
@@ -78,7 +78,7 @@ class GetSecretConfig extends AbstractCheckoutController
             'verifyflag' =>true,
             'secret' => 'error'
         );
-
+        
         if($this->getverifysignature())
         {
             //need do signature verification 
@@ -92,6 +92,7 @@ class GetSecretConfig extends AbstractCheckoutController
             else
             {
                 $var = $this->get_secret($merchantId);
+                
                 if($var === 'error')
                 {
                     //do update secret 
@@ -194,14 +195,14 @@ class GetSecretConfig extends AbstractCheckoutController
 	 * 
 	 */
     
-	private function get_secret($merchantId)
+	public function get_secret($merchantId)
 	{
 		try {
-			$basicauth = $this->getAuthorization();
+            $basicauth = $this->getAuthorization();
             $this->logger->addDebug("basicauth is: ".$basicauth);
             $requesturl = $this->getUrl("/webhook/v3/secret/").$merchantId;
             $this->logger->addDebug("requesturl is: ".$requesturl);
-			$ch = curl_init($requesturl);
+            $ch = curl_init($requesturl);
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
 			
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -229,7 +230,7 @@ class GetSecretConfig extends AbstractCheckoutController
 			}
 		} catch (Exception $e) {
 			
-			$this->logger->addDebug("Get secret failed:".$e->getMessage(),0);
+            $this->logger->addDebug("Get secret failed:".$e->getMessage(),0);
 			return "error";
 		}
     }
@@ -242,7 +243,7 @@ class GetSecretConfig extends AbstractCheckoutController
 	 * 
 	 */
     
-	private function update_secret($merchantId)
+	public function update_secret($merchantId)
 	{
 		try {
             $basicauth = $this->getAuthorization();
@@ -352,6 +353,12 @@ class GetSecretConfig extends AbstractCheckoutController
         $uri = rtrim($uri, '/');
         $url = $uri . $additionalPath;
         return $url;
+    }
+
+    private function TestLog($msg)
+    {
+        //todo enable it only when do unit test debug
+        fwrite(STDERR, print_r('||'.$msg.'||', TRUE));
     }
 
 }
