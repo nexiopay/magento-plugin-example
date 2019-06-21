@@ -114,7 +114,7 @@ class GetOneTimeUseTokenDataBuilder extends AbstractDataBuilder
         //processing_options
         
         $result[self::PROCESSING_OPTIONS] = [
-            self::WEBHOOK_URL => "https://".$_SERVER['HTTP_HOST']."/rest/V1/hello/test",
+            self::WEBHOOK_URL => "https://".$_SERVER['HTTP_HOST']."/rest/V1/webhook/success",
             self::CHECK_FRAUD => $this->getFraudCheck()?true:false,
             self::VERBOSE_RESPONSE => false,
             self::SAVE_CARD_TOKEN => false,

@@ -72,7 +72,7 @@ class GetOneTimeUseTokenDataBuilderTest extends \PHPUnit\Framework\TestCase
                 )
             ),
             'processingOptions' => array(
-                'webhookUrl' => "https://".$_SERVER['HTTP_HOST']."/rest/V1/hello/test",
+                'webhookUrl' => "https://".$_SERVER['HTTP_HOST']."/rest/V1/webhook/success",
                 'checkFraud'=>false,
                 'verboseResponse' => false,
                 'saveCardToken' => false
