@@ -2,4 +2,4 @@
 .gitmodules export-ignore
 .gitignore export-ignore
 .github export-ignore
-Nexio\Payment\Test export-ignore
+/Nexio/Payment/Test export-ignore
