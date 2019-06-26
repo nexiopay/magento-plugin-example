@@ -48,4 +48,4 @@ before_script:
     # copy Nexio into magento2
     - sudo mv $TRAVIS_BUILD_DIR/Nexio $TRAVIS_BUILD_DIR/magento2/app/code/	
 
-script: phpunit -c dev/tests/unit/phpunit.xml.dist app/code/Nexio/Payment/Test/Unit/
+script: php $TRAVIS_BUILD_DIR/magento2/vendor/bin/phpunit -c dev/tests/unit/phpunit.xml.dist app/code/Nexio/Payment/Test/Unit/
