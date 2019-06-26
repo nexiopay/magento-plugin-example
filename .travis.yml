@@ -44,7 +44,8 @@ before_script:
     - cd magento2
     - composer install --prefer-dist
     - pwd
+    - dir
     # copy Nexio into magento2
-    - sudo mv $TRAVIS_BUILD_DIR/Nexio magento2/app/code/	
+    - sudo mv $TRAVIS_BUILD_DIR/Nexio $TRAVIS_BUILD_DIR/magento2/app/code/	
 
 script: phpunit -c dev/tests/unit/phpunit.xml.dist app/code/Nexio/Payment/Test/Unit/
