@@ -43,7 +43,7 @@ before_script:
     # install Magento
     - cd magento2
     - composer install --prefer-dist
-   
+    - pwd
     # copy Nexio into magento2
     - sudo mv $TRAVIS_BUILD_DIR/Nexio magento2/app/code/	
 
