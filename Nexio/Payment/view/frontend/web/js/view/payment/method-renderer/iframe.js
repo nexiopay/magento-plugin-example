@@ -248,9 +248,10 @@ define(
 		    console.log('get event: ' + JSON.stringify(data));
                 if (self.iframeUrl.indexOf(event.origin) === 0) {
                     if (data.event === 'error') {
-			    console.log('get data error from Nexio: ' + JSON.stringify(data));
+			            console.log('get data error from Nexio: ' + JSON.stringify(data));
                         self.alertError(
-                            $t('Something went wrong. Please try again later.'+JSON.stringify(data)),
+                            //$t('Something went wrong. Please try again later.'+JSON.stringify(data)),
+                            $t('Transaction was declined. Please try again later.'),
                             url.build('checkout/cart/')
                         );
                     } else if (data.event === 'formValidations') {
@@ -345,6 +346,5 @@ define(
         });
     }
 );
-
 
 
