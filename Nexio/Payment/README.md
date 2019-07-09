@@ -8,7 +8,7 @@ Accept Credit Card transaction with [Nexio's](https://nexiopay.com/) payment pla
 - Copy the entire folder into your magento installpath/app/code. For example, suppose your magento installation path is /var/www/html/magento, then you should copy the extension into /var/www/html/magento/app/code/
 - run php bin/magento setup:upgrade
 - run php bin/magento setup:di:compile
-- run php bin/magento setup:static-content:deploy -f
+- run php bin/magento setup:static-content:deploy
 
 ### Configuration
 - Login your magento adminstration page.

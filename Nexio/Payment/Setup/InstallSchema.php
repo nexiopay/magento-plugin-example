@@ -18,22 +18,25 @@ class InstallSchema implements InstallSchemaInterface
     public function install(SchemaSetupInterface $setup, ModuleContextInterface $context)
     {
         $installer = $setup;
-        $installer->startSetup(); 
-        
+        $installer->startSetup();
+
         $data[] = ['status' => 'nexio_paid', 'label' => 'Paid in Nexio'];
         $data[] = ['status' => 'nexio_auth', 'label' => 'Authorized by Nexio'];
-        
+        $data[] = ['status' => 'nexio_pending', 'label' => 'Pending Nexio'];
+
         $setup->getConnection()->insertArray($setup->getTable('sales_order_status'), ['status', 'label'], $data);
 
         $setup->getConnection()->insertArray(
         $setup->getTable('sales_order_status_state'),
         ['status', 'state', 'is_default','visible_on_front'],
         [
-            ['nexio_auth','processing', '0', '1'], 
-            ['nexio_paid', 'processing', '0', '1']
+            ['nexio_auth','processing', '0', '1'],
+            ['nexio_paid', 'processing', '0', '1'],
+            ['nexio_pending','pending','0','1']
         ]
         );
 
         $setup->endSetup();
     }
 }
+

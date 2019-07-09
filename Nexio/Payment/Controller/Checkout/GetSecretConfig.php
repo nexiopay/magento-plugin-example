@@ -167,7 +167,8 @@ class GetSecretConfig extends AbstractCheckoutController
     
                 //$order->setState('processing');
                 //only update order status
-                $order->setStatus('processing');
+                //$order->setStatus('processing');
+                $order->setStatus('nexio_paid');
 
                 $order->save();
                 $invoice->save();
@@ -176,6 +177,7 @@ class GetSecretConfig extends AbstractCheckoutController
             else
             {
                 $this->logger->addDebug('Transaction is not cpatured, only save order info');
+                //$order->setStatus('nexio_auth');
                 $order->setStatus('nexio_auth');
                 $order->save();
             }
