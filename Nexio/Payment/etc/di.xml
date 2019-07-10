@@ -108,13 +108,13 @@
             </argument>
         </arguments>
     </virtualType>
-    <virtualType name="NexioRefundHandler" type="Magento\Payment\Gateway\Response\HandlerChain">
+    <!--<virtualType name="NexioRefundHandler" type="Magento\Payment\Gateway\Response\HandlerChain">
         <arguments>
             <argument name="handlers" xsi:type="array">
                 <item name="payment_details" xsi:type="string">Nexio\Payment\Gateway\Response\Refund\PaymentDetailsHandler</item>
             </argument>
         </arguments>
-    </virtualType>
+    </virtualType>-->
     <!-- End Handlers -->
 
     <!-- Commands -->
@@ -127,15 +127,15 @@
             <argument name="handler" xsi:type="object">NexioTransactionHandler</argument>
         </arguments>
     </virtualType>
-    <virtualType name="NexioRefundCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+    <!--<virtualType name="NexioRefundCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
         <arguments>
             <argument name="requestBuilder" xsi:type="object">NexioRefundRequest</argument>
-            <!--<argument name="transferFactory" xsi:type="object">NexioRefundTransferFactory</argument>-->
+            <argument name="transferFactory" xsi:type="object">NexioRefundTransferFactory</argument>
             <argument name="client" xsi:type="object">Nexio\Payment\Gateway\Http\Client\TransactionRefund</argument>
             <argument name="validator" xsi:type="object">Nexio\Payment\Gateway\Validator\ResponseValidator</argument>
-            <!--<argument name="handler" xsi:type="object">NexioRefundHandler</argument>-->
+            <argument name="handler" xsi:type="object">NexioRefundHandler</argument>
         </arguments>
-    </virtualType>
+    </virtualType>-->
     <virtualType name="NexioAuthorizeCommand" type="NexioTransactionCommand">
         <arguments>
             <argument name="requestBuilder" xsi:type="object">NexioAuthorizeRequest</argument>
@@ -183,13 +183,13 @@
             </argument>
         </arguments>
     </virtualType>
-    <virtualType name="NexioRefundRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
+    <!--<virtualType name="NexioRefundRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
         <arguments>
             <argument name="builders" xsi:type="array">
                 <item name="data" xsi:type="string">Nexio\Payment\Gateway\Request\RefundDataBuilder</item>
             </argument>
         </arguments>
-    </virtualType>
+    </virtualType>-->
     <!-- End Request Builder-->
 
     <!-- Transfer Factory-->
@@ -203,11 +203,11 @@
             <argument name="action" xsi:type="const">Nexio\Payment\Gateway\Http\TransferFactory::ACTION_AUTHORIZE</argument>
         </arguments>
     </virtualType>
-    <virtualType name="NexioRefundTransferFactory" type="Nexio\Payment\Gateway\Http\TransferFactory">
+    <!--<virtualType name="NexioRefundTransferFactory" type="Nexio\Payment\Gateway\Http\TransferFactory">
         <arguments>
             <argument name="action" xsi:type="const">Nexio\Payment\Gateway\Http\TransferFactory::ACTION_REFUND</argument>
         </arguments>
-    </virtualType>
+    </virtualType>-->
     <virtualType name="GetOneTimeUseTokenTransferFactory" type="Nexio\Payment\Gateway\Http\TransferFactory">
         <arguments>
             <argument name="action" xsi:type="const">Nexio\Payment\Gateway\Http\TransferFactory::GET_ONE_TIME_USE_TOKEN</argument>
