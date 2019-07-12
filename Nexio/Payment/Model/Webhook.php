@@ -18,11 +18,9 @@ class Webhook implements WebhookInterface
     protected $config;
     
     public function __construct(
-        \Nexio\Payment\Logger\Logger $logger//,
-        //ConfigInterface $config
+        \Nexio\Payment\Logger\Logger $logger
     ) {
         $this->logger = $logger;
-        //$this->config = $config;
     }
 
     public function success()
@@ -37,22 +35,6 @@ class Webhook implements WebhookInterface
         $this->logger->addDebug('body of callbackdata: '.$post);
 
         $param = json_decode($post,true);
-
-        /*
-        try
-        {
-            $orderId = $param['data']['data']['customer']['orderNumber'];
-            $this->logger->addDebug('OrderId: '.$param['data']['data']['customer']['orderNumber']);
-            $order = Mage::getModel('sales/order')->load($orderId);
-
-            $orderNum = $order->getIncrementId();
-            $this->logger->addDebug('OrderNum: '.$orderNum);
-        }
-        catch(Exception $e)
-        {
-            $this->logger->addDebug('order info exception: '.$e->getMessage());
-        }
-        */
         
         $this->process($headerStringValue,$post);
 
@@ -86,8 +68,7 @@ class Webhook implements WebhookInterface
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
 			
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			//curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            //    "Content-Type: application/json"));
+			
 			$result = curl_exec($ch);
 			$error = curl_error($ch);
 			curl_close($ch);
@@ -131,7 +112,7 @@ class Webhook implements WebhookInterface
 
                 if($verifypassed)
                 {
-                    //todo update order
+                    //update order
                     //convert data into request parameters
                     $UpdateOrderParm = json_decode($post);
                     
@@ -153,7 +134,7 @@ class Webhook implements WebhookInterface
                 }
                 else
                 {
-                    //todo update order with error
+                    //update order with error
                     $UpdateOrderParm = json_decode($post);
                     
                     $this->logger->addDebug("&orderId=".$UpdateOrderParm->data->data->customer->orderNumber);

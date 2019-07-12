@@ -27,7 +27,6 @@ class GetSecretConfig extends AbstractCheckoutController
             //there is command, use the passed value
             $command = $_GET["command"];
             $this->logger->addDebug('parameter: '. $_GET["command"]);
-            //fwrite(STDERR, print_r('get command: '.$_GET["command"], TRUE));
         }
         
         
@@ -151,7 +150,7 @@ class GetSecretConfig extends AbstractCheckoutController
         $payment->setShouldCloseParentTransaction(false);
         $payment->setIsTransactionClosed(false);
 
-        //todo need judege type is capture or only auth if only auth, do not generate invoice !!!!
+        //judege type is capture or only auth if only auth, do not generate invoice !!!!
         try
         {
             if($eventType === "TRANSACTION_CAPTURED")
@@ -165,9 +164,6 @@ class GetSecretConfig extends AbstractCheckoutController
                 //this line makes invoice with correct amount
                 $transaction->addObject($invoice);
     
-                //$order->setState('processing');
-                //only update order status
-                //$order->setStatus('processing');
                 $order->setStatus('nexio_paid');
 
                 $order->save();
@@ -177,7 +173,6 @@ class GetSecretConfig extends AbstractCheckoutController
             else
             {
                 $this->logger->addDebug('Transaction is not cpatured, only save order info');
-                //$order->setStatus('nexio_auth');
                 $order->setStatus('nexio_auth');
                 $order->save();
             }
