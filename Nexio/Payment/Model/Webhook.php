@@ -54,6 +54,13 @@ class Webhook implements WebhookInterface
         }
         */
         
+        $this->process($headerStringValue,$post);
+
+    }
+
+    public function process($headerStringValue,$post)
+    {
+        $param = json_decode($post,true);
         if(empty($param->data->merchantId))
             $merchantId = "";
         else
@@ -61,9 +68,6 @@ class Webhook implements WebhookInterface
         
 
         $this->callGetSecret($headerStringValue,$post,$merchantId);
-
-
-
     }
 
     public function loadsecret()
@@ -289,4 +293,5 @@ class Webhook implements WebhookInterface
 	}
 	
 }
+
 
