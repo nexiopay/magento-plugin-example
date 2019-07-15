@@ -55,7 +55,7 @@ define(
                 return 'nexio_vault';
             },
             isValid: function () {
-                // return window.checkoutConfig.payment[this.getCode()].isValid;
+                
                 return true;
             },
             showiFrame:function(){
@@ -88,13 +88,7 @@ define(
                         url: self.getIframeUrl(),
                         showLoader: true,
                         data: JSON.stringify(postdata),
-			            /*{
-                            billingAddress: JSON.stringify(quote.billingAddress()),
-                            totals: quote.totals(),
-                            items: quote.getItems()
-                        },*/
-                        type: 'POST'//,
-			            //contentType:"application/json; charset=utf-8"
+                        type: 'POST'
                     }).done(function (response) {
                         if (response) {
                             var iframeBaseUrl = self.iframeBaseUrl(),
@@ -131,12 +125,6 @@ define(
             beforePlaceOrder: function () {
                 var self = this;
                 self.placeOrder();
-                //self.showiFrame();
-                /*
-                self.alertError(
-                    $t('Nothing happens, hahaha!'),
-                    url.build('checkout/cart/')
-                );*/
             },
             placeOrder: function (data, event) {
                 var self = this;
@@ -146,11 +134,8 @@ define(
                 }
 
                 if (this.validate() && additionalValidators.validate()) {
-                //if (this.validate()) {
                     console.log('this.validate passed');
                     this.isPlaceOrderActionAllowed(false);
-
-                    //skip getPlaceOrderDeferredObject first
                     
                     this.getPlaceOrderDeferredObject()
                         .fail(
@@ -163,33 +148,16 @@ define(
                             function () {
                                 console.log('getPlaceOrderDeferredObject success');
                                 var result = self.afterPlaceOrder();
-                                /*
-                                if(result)
-                                {
-                                    if (self.redirectAfterPlaceOrder) {
-                                        redirectOnSuccessAction.execute();
-                                    }
-                                }
-                                else
-                                {
-                                    self.alertError(
-                                        $t('Failed to go to iFrame'),
-                                        url.build('checkout/cart/')
-                                    );
-                                }
-                                */
-                                
                             }
                         );
                     
                     return true;
                 }
-                //console.log('this.validate failed');
+                
                 return true;
             },
             afterPlaceOrder: function() {
                 var self = this;
-                //todo , call getsecret to check if checkout session can makes me get orderid or not
                 self.showiFrame();
                 
                 return false;
@@ -248,9 +216,9 @@ define(
 		    console.log('get event: ' + JSON.stringify(data));
                 if (self.iframeUrl.indexOf(event.origin) === 0) {
                     if (data.event === 'error') {
-			    console.log('get data error from Nexio: ' + JSON.stringify(data));
+			            console.log('get data error from Nexio: ' + JSON.stringify(data));
                         self.alertError(
-                            $t('Something went wrong. Please try again later.'+JSON.stringify(data)),
+                            $t('Transaction was declined. Please try again later.'),
                             url.build('checkout/cart/')
                         );
                     } else if (data.event === 'formValidations') {
@@ -264,15 +232,10 @@ define(
                             break;
                         }
                         self.isValid(isValid);
-                    //} else if (data.event === 'success') {
-                    } else if (data.event === 'processed') {//else if (data.event === 'cardSaved') {
+                    } else if (data.event === 'processed') {
 			            console.log('get data success from Nexio: ' + JSON.stringify(data));
-                        //if (data.data.token.success) {
-                            //self.savedCard = data.data;
-                            // fullScreenLoader.startLoader();
                             self.closeModal();
                             self.iframeLoaded = false;
-                            //todo redirect to success page
                             if (self.redirectAfterPlaceOrder) {
                                 redirectOnSuccessAction.execute();
                             }
@@ -302,22 +265,15 @@ define(
             },
             submitForm: function () {
                 fullScreenLoader.startLoader();
-                // setTimeout(function () {
-                //     this.alertError($t('Something went wrong. Please try again later.'));
-                //     this.closeModal();
-                //     this.iframeLoaded = false;
-                // }.bind(this), 30000);
                 window.document.getElementById('nexio-iframe').contentWindow.postMessage('posted', this.iframeUrl);
             },
             alertError: function (content, config) {
                 var callback = null;
                 if (typeof config === 'string') {
-                    // if config instanceof String -> redirect to
                     callback = function () {
                         window.location.replace(config);
                     }
                 } else if ($.isFunction(config)) {
-                    // if config is callback func -> assign to OK button.
                     callback = config;
                 }
                 var alertConfig = {

@@ -35,7 +35,7 @@ class IframeConfig extends AbstractCheckoutController
                 $this->logger->addDebug('order id is: '.$orderId);
                 $this->logger->addDebug('original order number is: '.$jsonparm['billingAddress']['ordernumber']);
                 
-                $order->setStatus('pending');
+                $order->setStatus('nexio_pending');
                 $order->save();
 
                 $jsonparm['billingAddress']['ordernumber'] = $orderId;

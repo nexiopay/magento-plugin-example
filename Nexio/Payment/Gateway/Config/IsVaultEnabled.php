@@ -10,3 +10,4 @@ class IsVaultEnabled extends AbstractConfig
 {
 
 }
+

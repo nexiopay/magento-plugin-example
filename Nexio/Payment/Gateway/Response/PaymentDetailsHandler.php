@@ -33,44 +33,6 @@ class PaymentDetailsHandler extends AbstractHandler
             $this->logger->addDebug('capture process payment can not capture!!');
         }
 
-        /*$this->logger->addDebug('response: '.json_encode($response));
-        
-        $paymentDO = SubjectReader::readPayment($handlingSubject);
-
-        $response = $this->readResponse($response);
-
-        // @var \Magento\Sales\Model\Order\Payment $payment 
-        $payment = $paymentDO->getPayment();
-
-        $payment->setCcTransId(@$response['ref_number']);
-        $payment->setLastTransId(@$response['ref_number']);
-        $payment->setTransactionId(@$response['ref_number']);
-        $payment->setShouldCloseParentTransaction(false);
-        $payment->setIsTransactionClosed(false);
-
-        $additionalInfo = $payment->getAdditionalInformation();
-        $last4 = @$additionalInfo['last4'];
-        $cardType = @$additionalInfo['card_type'];
-        $expMonth = @$additionalInfo['expMonth'];
-        $expYear = @$additionalInfo['expYear'];
-
-        $payment->setCcLast4($last4);
-        $payment->setCcType($cardType);
-        $payment->setCcExpMonth($expMonth);
-        $payment->setCcExpYear($expYear);
-
-//         set card details to additional info
-        try {
-            $payment->setAdditionalInformation('cc_number', 'xxxx-' . $last4);
-            $payment->setAdditionalInformation('cc_type', $cardType);
-            $payment->setAdditionalInformation('ref_number', @$response['ref_number']);
-            $payment->setAdditionalInformation('gateway_name', @$response['gateway_name']);
-            $payment->setAdditionalInformation('auth_code', @$response['auth_code']);
-            $payment->setAdditionalInformation('status', @$response['status']);
-            $payment->setAdditionalInformation('payment_id', @$response['payment_id']);
-        } catch (LocalizedException $e) {
-            $this->logger->addDebug("Exception when handling payment details");
-        }*/
     }
 
     /**

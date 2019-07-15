@@ -19,7 +19,7 @@ class AuthorizeDataBuilder extends AbstractDataBuilder
         $paymentDataObj = SubjectReader::readPayment($buildSubject);
 
         $paymentInfo = $paymentDataObj->getPayment();
-        //$token = $paymentInfo->getAdditionalInformation('token');
+        $token = $paymentInfo->getAdditionalInformation('token');
 
         if (!$token) {
             return [];

@@ -67,20 +67,10 @@ class GetOneTimeUseTokenDataBuilder extends AbstractDataBuilder
      */
     public function build(array $buildSubject)
     {
-       // $items = $buildSubject['items'];
         $totals = $buildSubject['totals'];
         $billingAddress = $buildSubject['billingAddress'];
 
-        /*$cartItems = [];
-        foreach ($items as $item) {
-            $cartItem = [];
-            $cartItem[self::ITEM] = @$item['sku'];
-            $cartItem[self::DESCRIPTION] = @$item['description'];
-            $cartItem[self::QUANTITY] = @$item['qty'];
-            $cartItem[self::PRICE] = @$item['base_row_total_incl_tax'];
-            $cartItem[self::TYPE] = self::SALE;
-            $cartItems[] = $cartItem;
-	}*/
+        
         $result = [
             self::DATA => [
                 self::PAYMENT_METHOD     => self::CREDIT_CARD,
@@ -104,10 +94,7 @@ class GetOneTimeUseTokenDataBuilder extends AbstractDataBuilder
                     self::BILL_TO_STATE       => @$billingAddress['regionCode'],
                     self::BILL_TO_POSTAL      => @$billingAddress['postcode'],
                     self::BILL_TO_COUNTRY     => @$billingAddress['countryId'],
-                ]//,
-                //self::CART               => [
-                //    self::ITEMS => $cartItems
-               // ]
+                ]
             ]
         ];
 
@@ -152,8 +139,7 @@ class GetOneTimeUseTokenDataBuilder extends AbstractDataBuilder
         //isAuthOnly
         $result[self::AUTH_ONLY] = $this->getAuthOnly()?true:false;
 
-        //todo custom fields
-        //Mage::helper('core/url')->getCurrentUrl();
+        
         return $result;
     }
 

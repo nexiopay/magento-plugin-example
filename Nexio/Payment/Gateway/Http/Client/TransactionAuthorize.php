@@ -18,24 +18,7 @@ class TransactionAuthorize extends AbstractTransaction
     public function process($uri, array $headers, array $data)
     {   
         $this->logger->addDebug("Begin Auth trans process");
-        /*
-        $result = parent::process($uri, $headers, $data);
-        if (@$result['phrase'] === 'OK') {
-            $result['body'] = json_decode(@$result['body'], JSON_OBJECT_AS_ARRAY);
-            if (isset($result['body']['kountResponse']['rules'])) {
-                $result['body']['kountResponse']['rules'] = json_decode(
-                    $result['body']['kountResponse']['rules'],
-                    JSON_OBJECT_AS_ARRAY
-                );
-            }
-        } else {
-            $this->logger->addDebug(
-                "Error when processing authorize action: \n" .
-                print_r($result, true)
-            );
-            $this->logger->addDebug("Body was sent: \n" . print_r($data, true));
-        }
-        */
+        
         $body = array(
             "result" => "this is a test"
         );
