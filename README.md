@@ -1,5 +1,5 @@
-# README
-A Nexio Magento extension. Takes credit card payments directly on your Magento store using Nexio.
+# DEPRECATED
+DEPRECATED A Nexio Magento extension. Takes credit card payments directly on your Magento store using Nexio.
 
 ### Description
 Accept Credit Card transaction with [Nexio's](https://nexiopay.com/) payment platform. 
